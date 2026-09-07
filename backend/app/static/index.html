@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Intelligence Platform — AI-Powered Farm Advisory</title>
+    <meta name="description" content="AI-powered crop recommendation, yield prediction, and farm economics for Indian farmers." />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+
+      <!-- ── Hero ─────────────────────────────────────────────────── -->
+      <section class="hero-card">
+        <div class="hero-copy">
+          <p class="eyebrow">22-Crop · Ensemble AI · Live Economics</p>
+          <h1>Crop recommendation, yield prediction, and farm economics — in one flow.</h1>
+          <p class="hero-text">
+            Draw your land on the map — temperature, humidity, rainfall, and area fill automatically.
+            Adjust sliders if needed, then predict the best crop to sow <em>right now</em>.
+          </p>
+        </div>
+        <div class="hero-badge">
+          <span>Models</span>
+          <strong>LightGBM + CatBoost + Stacking Ensemble + Yield Regression</strong>
+        </div>
+      </section>
+
+      <!-- ── Workspace ──────────────────────────────────────────────── -->
+      <section class="workspace">
+
+        <!-- ── Input panel ──────────────────────────────────────────── -->
+        <section class="panel form-panel">
+          <form id="prediction-form" novalidate>
+
+            <div class="panel-header">
+              <h2>Input Profile</h2>
+              <button type="submit" class="primary-btn" id="predict-btn">Predict Best Crop</button>
+            </div>
+
+            <!-- Soil type preset -->
+            <div class="preset-row">
+              <label for="soil-type-select" class="preset-label">Soil Type</label>
+              <select id="soil-type-select" class="preset-select">
+                <option value="">— Select to auto-fill N/P/K/pH —</option>
+                <option value="alluvial">Alluvial (Indo-Gangetic plains)</option>
+                <option value="black_cotton">Black Cotton (Deccan plateau)</option>
+                <option value="red_laterite">Red Laterite (South India)</option>
+                <option value="sandy_loam">Sandy Loam (Rajasthan/Gujarat)</option>
+                <option value="clay">Clay (Coastal/Delta)</option>
+              </select>
+            </div>
+
+            <!-- Hidden inputs — values driven by sliders & map -->
+            <div id="hidden-inputs" style="display:none"></div>
+
+            <!-- Sliders — PRIMARY input method -->
+            <div class="slider-section">
+              <div class="slider-grid" id="slider-grid"></div>
+            </div>
+
+            <!-- Context fields -->
+            <div class="context-row">
+              <div class="context-field">
+                <label for="previous-crop-select">Previous Crop</label>
+                <select id="previous-crop-select" class="ghost-select">
+                  <option value="">— None / First season —</option>
+                  <option value="rice">Rice</option>
+                  <option value="maize">Maize</option>
+                  <option value="blackgram">Blackgram</option>
+                  <option value="chickpea">Chickpea</option>
+                  <option value="lentil">Lentil</option>
+                  <option value="cotton">Cotton</option>
+                  <option value="jute">Jute</option>
+                  <option value="mungbean">Mungbean</option>
+                  <option value="pigeonpeas">Pigeonpeas</option>
+                  <option value="kidneybeans">Kidneybeans</option>
+                  <option value="mothbeans">Mothbeans</option>
+                  <option value="watermelon">Watermelon</option>
+                  <option value="muskmelon">Muskmelon</option>
+                  <option value="pomegranate">Pomegranate</option>
+                  <option value="banana">Banana</option>
+                  <option value="coconut">Coconut</option>
+                </select>
+              </div>
+              <div class="context-field">
+                <label for="irrigation-select">Irrigation Source</label>
+                <select id="irrigation-select" class="ghost-select">
+                  <option value="">— Not specified —</option>
+                  <option value="rain_fed">Rain-fed only</option>
+                  <option value="canal">Canal Irrigation</option>
+                  <option value="borewell">Borewell</option>
+                  <option value="drip">Drip Irrigation</option>
+                  <option value="sprinkler">Sprinkler</option>
+                </select>
+              </div>
+            </div>
+
+          </form>
+
+          <!-- ── Map ─────────────────────────────────────────────── -->
+          <section class="map-card">
+            <div class="panel-header map-header">
+              <div>
+                <h2>Land Map</h2>
+                <p class="map-subtitle">Click or draw your farm — area, temperature, humidity, and rainfall fill automatically.</p>
+              </div>
+              <div class="map-actions">
+                <button id="locate-btn" type="button" class="ghost-btn">Use My Location</button>
+                <button id="clear-map-btn" type="button" class="ghost-btn">Clear Shape</button>
+              </div>
+            </div>
+            <div class="draw-tools">
+              <button id="draw-polygon-btn" type="button" class="ghost-btn">Polygon</button>
+              <button id="draw-rectangle-btn" type="button" class="ghost-btn">Rectangle</button>
+              <button id="draw-circle-btn" type="button" class="ghost-btn">Circle</button>
+            </div>
+            <div id="map"></div>
+
+            <!-- Area / Coordinates / Rain BELOW the map -->
+            <div class="map-meta">
+              <div class="map-meta-item">
+                <span>Area</span>
+                <strong id="area-display">Draw on map</strong>
+              </div>
+              <div class="map-meta-item">
+                <span>Coordinates</span>
+                <strong id="coords-display">Waiting for location</strong>
+              </div>
+            </div>
+            <div class="map-meta rainfall-meta">
+              <div class="map-meta-item">
+                <span>Recent 30-Day Rain</span>
+                <strong id="recent-rainfall-display">Waiting for map</strong>
+              </div>
+              <div class="map-meta-item">
+                <span>Climate Rainfall Input</span>
+                <strong id="climate-rainfall-display">Waiting for map</strong>
+              </div>
+            </div>
+            <div id="location-banner" class="location-banner">Click the map or draw your land boundary.</div>
+            <p class="source-line">Weather source: Open-Meteo forecast + archive APIs</p>
+          </section>
+        </section>
+
+        <!-- ── Results panel ───────────────────────────────────────── -->
+        <section class="panel result-panel">
+          <div class="panel-header">
+            <h2>Recommendation Output</h2>
+            <button id="download-report-btn" class="hidden" type="button" style="background:linear-gradient(135deg,#225c36,#123e23);color:white;border:none;font-weight:600;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:0.82rem;box-shadow:0 2px 8px rgba(34,92,54,.3)">Download Farm Report</button>
+          </div>
+
+          <div id="status" class="status-pill">Loading metadata...</div>
+          <div id="shap-sentence" class="shap-sentence hidden"></div>
+          <div id="best-crop" class="best-crop-card hidden"></div>
+          <div id="ideal-ground-card" class="best-crop-card hidden"></div>
+          <div id="market-source-badge" class="market-badge hidden"></div>
+          <div id="training-metrics" class="metrics-grid"></div>
+
+          <section id="xai-panel" class="xai-panel hidden">
+            <div class="xai-grid">
+              <article class="xai-card">
+                <h3>Why This Crop?</h3>
+                <div id="local-explanation"></div>
+              </article>
+              <article class="xai-card">
+                <h3>Model Comparison</h3>
+                <div id="model-overview" class="graph-list"></div>
+              </article>
+            </div>
+            <div class="xai-card">
+              <h3>Crop Comparison Radar</h3>
+              <p class="card-subtitle">Top crops compared across Profit, Low Cost, Safety, Sustainability, Water Efficiency</p>
+              <div class="radar-wrap">
+                <canvas id="radar-chart" width="420" height="320"></canvas>
+              </div>
+            </div>
+            <div class="xai-grid">
+              <article class="xai-card">
+                <h3>Global Feature Importance</h3>
+                <div id="global-features" class="feature-chips"></div>
+              </article>
+              <article class="xai-card">
+                <h3>Rejected Crops</h3>
+                <div id="rejected-crops" class="rejection-list"></div>
+              </article>
+            </div>
+            <div class="xai-card">
+              <h3>SHAP Summary Graphs</h3>
+              <div class="plot-grid">
+                <figure class="plot-card">
+                  <figcaption>LightGBM Summary</figcaption>
+                  <img id="plot-lightgbm" alt="LightGBM SHAP summary plot" />
+                </figure>
+                <figure class="plot-card">
+                  <figcaption>CatBoost Summary</figcaption>
+                  <img id="plot-catboost" alt="CatBoost SHAP summary plot" />
+                </figure>
+              </div>
+            </div>
+          </section>
+
+          <!-- Perennial options -->
+          <section id="perennial-panel" class="perennial-panel hidden">
+            <div class="panel-header" style="padding:14px 20px;flex-wrap:wrap;gap:8px">
+              <h2>Long-Term Investment Options</h2>
+              <span class="badge-note">Orchard &amp; plantation crops — separate from seasonal ranking</span>
+            </div>
+            <p class="perennial-intro">These perennial crops suit your soil and climate but require multi-year investment.</p>
+            <div id="perennial-cards" class="perennial-grid"></div>
+          </section>
+
+          <!-- Results table -->
+          <div class="table-wrap">
+            <table id="results-table" class="results-table hidden">
+              <thead>
+                <tr>
+                  <th>Crop</th><th>Sowing</th><th>Harvest</th><th>Duration</th>
+                  <th>Yield (t/ha)</th><th>Price (₹/kg)</th><th>Cost (₹/ha)</th>
+                  <th>Revenue (₹/ha)</th><th>Profit (₹/ha)</th><th>Risk</th>
+                  <th>Sustainability</th><th>Score</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <footer class="project-footer">
+        <p class="footer-signature">Santhosh S | 23MIS0616 | Artificial Intelligence Project</p>
+      </footer>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <script src="/static/app.js?v=20260719-3"></script>
+  </body>
+</html>
