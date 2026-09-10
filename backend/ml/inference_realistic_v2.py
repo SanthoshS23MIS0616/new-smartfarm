@@ -349,11 +349,10 @@ class InferenceEngine:
             prepared.update(SOIL_TYPE_PRESETS[soil_type])
 
         prepared.update({k: v for k, v in payload.items() if v is not None})
-        prepared["season"] = derive_season(date.today().month)
         prepared["crop_year"] = date.today().year
         prepared["_state_source"] = "user provided" if payload.get("state_name") else "dataset default"
 
-        # ── Fix #1: Reverse-geocode lat/lng → real state_name on every call ──
+        # ── Reverse-geocode lat/lng → real state_name ──────────────────────
         lat = payload.get("latitude")
         lng = payload.get("longitude")
         if lat is not None and lng is not None:
@@ -362,12 +361,93 @@ class InferenceEngine:
                 prepared["state_name"] = geocoded_state
                 prepared["_state_source"] = "GPS coordinates"
 
+        # ── IMD: Region-aware season detection (North ≠ South India) ───────
+        # South India Kharif extends to November due to NE Monsoon
+        try:
+            from backend.ml.imd_state_rainfall import derive_season_for_state, get_state_monthly_rainfall
+            state_name = str(prepared.get("state_name", ""))
+            current_month = date.today().month
+            prepared["season"] = derive_season_for_state(current_month, state_name)
+
+            # ── IMD: Historical rainfall normal for this state+month ─────────
+            # Stored for advisory context; does NOT override Open-Meteo live value
+            imd_normal_mm = get_state_monthly_rainfall(state_name, current_month)
+            prepared["_imd_rainfall_normal_mm"] = round(imd_normal_mm, 1)
+
+            # If no live rainfall provided, use IMD normal as sensible default
+            if payload.get("rainfall_mm") is None:
+                prepared["rainfall_mm"] = imd_normal_mm
+                prepared["_rainfall_source"] = "IMD historical normal"
+            else:
+                prepared["_rainfall_source"] = "user/Open-Meteo"
+        except Exception:
+            prepared["season"] = derive_season(date.today().month)  # original fallback
+            prepared["_imd_rainfall_normal_mm"] = None
+            prepared["_rainfall_source"] = "default"
+
+        # ── NPK Soil Adjustment from Previous Crop (from reference project) ─
+        # Science: heavy feeders (rice, cotton) deplete soil; legumes restore N
+        _PREV_CROP_NPK_IMPACT: dict[str, dict[str, float]] = {
+            "rice":      {"n": -15, "p": -3,  "k": -10},
+            "maize":     {"n": -20, "p": -8,  "k": -12},
+            "wheat":     {"n": -10, "p": -5,  "k": -8},
+            "cotton":    {"n": -25, "p": -10, "k": -15},
+            "sugarcane": {"n": -30, "p": -12, "k": -20},
+            "potato":    {"n": -18, "p": -8,  "k": -15},
+            "tomato":    {"n": -12, "p": -6,  "k": -10},
+            "onion":     {"n": -8,  "p": -4,  "k": -6},
+            "jute":      {"n": -8,  "p": -4,  "k": -8},
+            # Nitrogen fixers (legumes) — restore nitrogen
+            "blackgram": {"n": +12, "p": -2,  "k": -3},
+            "lentil":    {"n": +10, "p": -2,  "k": -3},
+            "soybean":   {"n": +15, "p": -5,  "k": -5},
+            "groundnut": {"n": +10, "p": -3,  "k": -4},
+            "chickpea":  {"n": +12, "p": -2,  "k": -3},
+            "mungbean":  {"n": +8,  "p": -2,  "k": -2},
+        }
+        previous_crop = str(payload.get("previous_crop", "") or "").strip().lower()
+        impact = _PREV_CROP_NPK_IMPACT.get(previous_crop)
+        prepared["_npk_adjusted"] = False
+        prepared["_npk_adjustment_note"] = None
+        if impact:
+            orig_n = float(prepared.get("nitrogen", 0))
+            orig_p = float(prepared.get("phosphorous", 0))
+            orig_k = float(prepared.get("potassium", 0))
+            prepared["nitrogen"]    = round(max(0.0, orig_n + impact["n"]), 1)
+            prepared["phosphorous"] = round(max(0.0, orig_p + impact["p"]), 1)
+            prepared["potassium"]   = round(max(0.0, orig_k + impact["k"]), 1)
+            prepared["_npk_adjusted"] = True
+            direction = "nitrogen-fixing — boosts N" if impact["n"] > 0 else "heavy feeder — depletes nutrients"
+            prepared["_npk_adjustment_note"] = (
+                f"Previous crop ({previous_crop.title()}) is a {direction}. "
+                f"Soil N adjusted {orig_n:g}→{prepared['nitrogen']:g}, "
+                f"P {orig_p:g}→{prepared['phosphorous']:g}, "
+                f"K {orig_k:g}→{prepared['potassium']:g}."
+            )
+
         return prepared
+
 
     def _feature_name(self, raw_name: str) -> str:
         cleaned = raw_name.replace("num__", "").replace("cat__", "")
         cleaned = cleaned.replace("_", " ")
         return cleaned.title()
+
+    def _build_soil_health_report(self, prepared: dict) -> dict:
+        """
+        Generate ICAR/TNAU state-specific soil health ratings for N, P, K, pH.
+        Converts model ppm units to kg/ha for comparison against state norms.
+        """
+        try:
+            from backend.ml.soil_health_thresholds import full_soil_health_report
+            state = str(prepared.get("state_name", "default"))
+            n   = float(prepared.get("nitrogen",    0))
+            p   = float(prepared.get("phosphorous", 0))
+            k   = float(prepared.get("potassium",   0))
+            ph  = float(prepared.get("ph",          7.0))
+            return full_soil_health_report(n, p, k, ph, state)
+        except Exception as exc:
+            return {"error": str(exc), "source": "ICAR/TNAU norms unavailable"}
 
     def _get_explainer(self, key: str, model: Any) -> Any | None:
         if key in self._explainers:
@@ -809,6 +889,14 @@ class InferenceEngine:
 
         previous_crop: str | None = payload.get("previous_crop")
         irrigation_source: str | None = payload.get("irrigation_source")
+
+        # ── Parallel prefetch live mandi prices for all candidates ────────────
+        try:
+            from backend.ml.commodityonline_client import bulk_prefetch
+            candidate_crops = [str(labels[idx]) for idx in ranked_indices]
+            bulk_prefetch(candidate_crops, str(prepared.get("state_name")))
+        except Exception:
+            pass
 
         annual_candidates: list[dict[str, Any]] = []
         perennial_candidates: list[dict[str, Any]] = []
@@ -1443,11 +1531,16 @@ class InferenceEngine:
                 "area_hectares":    area_ha,
                 "state_name":       str(prepared.get("state_name", "Unknown")),
                 "state_source":     str(prepared.get("_state_source", "dataset default")),
+                "imd_rainfall_normal_mm": prepared.get("_imd_rainfall_normal_mm"),
+                "rainfall_source":  prepared.get("_rainfall_source", "default"),
+                "npk_adjusted":     prepared.get("_npk_adjusted", False),
+                "npk_adjustment_note": prepared.get("_npk_adjustment_note"),
                 "decision_rule": (
                     "Crops must pass agronomic suitability and hard rejection checks before economics. "
                     "Suitable crops are ranked by combined profit, cost, risk, and sustainability score."
                 ),
             },
+            "soil_health_report": self._build_soil_health_report(prepared),
             "rejected_crops": enriched_rejected,
             "reconciliation_note": recon_note,
             "used_defaults": {

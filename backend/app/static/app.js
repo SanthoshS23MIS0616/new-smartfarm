@@ -1,13 +1,13 @@
 // ── Slider configuration (these ARE the form inputs now) ───────────────────
 const SLIDER_CONFIG = [
-  { id: "nitrogen",      label: "Nitrogen (N)",        unit: "",    min: 0,   max: 140, step: 1,   default: 50  },
-  { id: "phosphorous",   label: "Phosphorous (P)",      unit: "",    min: 0,   max: 145, step: 1,   default: 50  },
-  { id: "potassium",     label: "Potassium (K)",        unit: "",    min: 0,   max: 205, step: 1,   default: 50  },
-  { id: "ph",            label: "Soil pH",              unit: "",    min: 3.5, max: 9.5, step: 0.1, default: 6.5 },
-  { id: "temperature_c", label: "Temperature",          unit: "°C",  min: 5,   max: 50,  step: 0.5, default: 28  },
-  { id: "humidity",      label: "Humidity",             unit: "%",   min: 10,  max: 100, step: 1,   default: 65  },
-  { id: "rainfall_mm",   label: "Rainfall",             unit: "mm",  min: 0,   max: 400, step: 5,   default: 120 },
-  { id: "moisture",      label: "Soil Moisture",        unit: "%",   min: 5,   max: 60,  step: 1,   default: 25  },
+  { id: "nitrogen",      label: "Nitrogen (N)",        unit: "kg/ha", min: 0,   max: 500, step: 1,   default: 50  },
+  { id: "phosphorous",   label: "Phosphorous (P)",      unit: "kg/ha", min: 0,   max: 200, step: 1,   default: 50  },
+  { id: "potassium",     label: "Potassium (K)",        unit: "kg/ha", min: 0,   max: 400, step: 1,   default: 50  },
+  { id: "ph",            label: "Soil pH",              unit: "",      min: 3.5, max: 9.5, step: 0.1, default: 6.5 },
+  { id: "temperature_c", label: "Temperature",          unit: "°C",    min: 5,   max: 50,  step: 0.5, default: 28  },
+  { id: "humidity",      label: "Humidity",             unit: "%",     min: 10,  max: 100, step: 1,   default: 65  },
+  { id: "rainfall_mm",   label: "Rainfall",             unit: "mm",    min: 0,   max: 400, step: 5,   default: 120 },
+  { id: "moisture",      label: "Soil Moisture",        unit: "%",     min: 5,   max: 60,  step: 1,   default: 25  },
 ];
 
 // Internal value store (source of truth for all slider values)
@@ -244,12 +244,9 @@ async function fetchSoilData(lat, lng) {
       return depth?.values?.mean ?? null;
     };
 
-    // nitrogen: cg/kg → scale to model range 0-140
-    const rawN  = getProp("nitrogen");
-    const rawPH = getProp("phh2o");   // pH × 10 encoding
-
-    const nitrogen = rawN  != null ? Math.min(140, Math.max(0, rawN / 100 * 10)) : null;
-    const ph       = rawPH != null ? Math.min(9.5, Math.max(3.5, rawPH / 10))    : null;
+    // nitrogen: cg/kg → scale to kg/ha (up to 500)
+    const nitrogen = rawN  != null ? Math.min(500, Math.max(0, Math.round((rawN / 100) * 15))) : null;
+    const ph       = rawPH != null ? Math.min(9.5, Math.max(3.5, rawPH / 10))                   : null;
 
     return { nitrogen, ph, source: "SoilGrids v2.0 (ISRIC)" };
   } catch (_) {

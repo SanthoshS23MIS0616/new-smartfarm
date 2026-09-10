@@ -15,13 +15,14 @@ import logging
 import re
 import time
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-_BASE = "https://www.commodityonline.com/mandiprices"
-_TIMEOUT  = 8
-_CACHE_TTL = 4 * 3600  # 4 hours
+_BASE      = "https://www.commodityonline.com/mandiprices"
+_TIMEOUT   = 1.5        # 1.5s timeout for fast response
+_CACHE_TTL = 4 * 3600   # 4 hours
 
 # -- Crop name ? URL slug ----------------------------------------------------
 _CROP_SLUG: dict[str, str] = {
@@ -92,11 +93,11 @@ _STATE_SLUG: dict[str, str] = {
 _cache: dict[str, tuple[float, float | None]] = {}
 
 
-def _cache_get(key: str) -> float | None:
+def _cache_get(key: str) -> tuple[bool, float | None]:
     entry = _cache.get(key)
     if entry and time.time() - entry[0] < _CACHE_TTL:
-        return entry[1]
-    return None
+        return True, entry[1]
+    return False, None
 
 
 def _cache_set(key: str, value: float | None) -> None:
@@ -154,9 +155,9 @@ def fetch_price_rs_per_kg(crop: str, state: str | None = None) -> tuple[float | 
         return None, "static_csv"
 
     cache_key = f"{crop_slug}::{state_slug or '*'}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        return cached, "cached_commodityonline"
+    is_cached, cached_val = _cache_get(cache_key)
+    if is_cached:
+        return cached_val, "cached_commodityonline" if cached_val else "static_csv"
 
     # Try state-specific first, then all-India
     price = _scrape(crop_slug, state_slug) if state_slug else None
@@ -168,6 +169,37 @@ def fetch_price_rs_per_kg(crop: str, state: str | None = None) -> tuple[float | 
         logger.info("CommodityOnline live price %s (%s): Rs%.2f/kg", crop, state or "all-India", price)
         return price, "live_commodityonline"
     return None, "static_csv"
+
+
+def bulk_prefetch(crops: list[str], state: str | None = None) -> None:
+    """
+    Fetch prices for multiple crops IN PARALLEL using ThreadPoolExecutor.
+    Results go into in-memory cache, reducing prediction latency.
+    """
+    to_fetch = []
+    for crop in crops:
+        crop_slug  = _CROP_SLUG.get(crop)
+        state_slug = _STATE_SLUG.get(state or "") if state else None
+        if not crop_slug:
+            continue
+        cache_key = f"{crop_slug}::{state_slug or '*'}"
+        is_cached, _ = _cache_get(cache_key)
+        if not is_cached:
+            to_fetch.append(crop)
+
+    if not to_fetch:
+        return
+
+    def _fetch_one(c: str) -> None:
+        fetch_price_rs_per_kg(c, state)
+
+    with ThreadPoolExecutor(max_workers=min(8, len(to_fetch))) as pool:
+        futures = [pool.submit(_fetch_one, c) for c in to_fetch]
+        for f in as_completed(futures):
+            try:
+                f.result()
+            except Exception:
+                pass
 
 
 def clear_cache() -> None:
