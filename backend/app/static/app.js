@@ -1265,11 +1265,82 @@ const micBtn = document.getElementById("mic-btn");
 const langSelect = document.getElementById("assistant-lang");
 const chatMessages = document.getElementById("chat-messages");
 
-if (toggleAssistantBtn) {
-  toggleAssistantBtn.addEventListener("click", () => {
-    assistantDock.classList.toggle("collapsed");
-    toggleAssistantBtn.textContent = assistantDock.classList.contains("collapsed") ? "□" : "_";
+if (toggleAssistantBtn && assistantDock) {
+  toggleAssistantBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isMinimized = assistantDock.classList.toggle("minimized");
+    assistantDock.classList.toggle("collapsed", isMinimized);
+    toggleAssistantBtn.textContent = isMinimized ? "+" : "_";
+    toggleAssistantBtn.title = isMinimized ? "Expand Chat" : "Minimize Chat";
   });
+}
+
+// ── Make Chatbot Draggable across the viewport ──────────────────────────────
+const assistantHeader = assistantDock?.querySelector(".assistant-header");
+if (assistantHeader && assistantDock) {
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  const startDrag = (e) => {
+    // Ignore clicks on control elements inside header (select, button)
+    if (e.target.closest("button") || e.target.closest("select")) return;
+
+    isDragging = true;
+    assistantDock.classList.add("dragging");
+
+    const clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+
+    const rect = assistantDock.getBoundingClientRect();
+    startX = clientX;
+    startY = clientY;
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    // Pin position to explicit pixel values for smooth dragging
+    assistantDock.style.right = "auto";
+    assistantDock.style.bottom = "auto";
+    assistantDock.style.left = `${initialLeft}px`;
+    assistantDock.style.top = `${initialTop}px`;
+
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  };
+
+  const onDrag = (e) => {
+    if (!isDragging) return;
+    if (e.cancelable) e.preventDefault();
+
+    const clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+
+    const maxLeft = Math.max(10, window.innerWidth - assistantDock.offsetWidth - 10);
+    const maxTop = Math.max(10, window.innerHeight - assistantDock.offsetHeight - 10);
+
+    const newLeft = Math.max(10, Math.min(initialLeft + dx, maxLeft));
+    const newTop = Math.max(10, Math.min(initialTop + dy, maxTop));
+
+    assistantDock.style.left = `${newLeft}px`;
+    assistantDock.style.top = `${newTop}px`;
+  };
+
+  const stopDrag = () => {
+    isDragging = false;
+    assistantDock?.classList.remove("dragging");
+    document.removeEventListener("mousemove", onDrag);
+    document.removeEventListener("mouseup", stopDrag);
+    document.removeEventListener("touchmove", onDrag);
+    document.removeEventListener("touchend", stopDrag);
+  };
+
+  assistantHeader.addEventListener("mousedown", startDrag);
+  assistantHeader.addEventListener("touchstart", startDrag, { passive: false });
 }
 
 function appendChatMessage(sender, text, citations = null, warning = null) {

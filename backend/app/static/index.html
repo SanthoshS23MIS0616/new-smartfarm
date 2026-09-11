@@ -278,8 +278,9 @@
 
       <!-- ── Voice & Text RAG Assistant ("Ask SmartFarm") ───────────── -->
       <aside class="assistant-dock" id="assistant-dock">
-        <div class="assistant-header">
+        <div class="assistant-header" title="Click and drag to move chatbot window">
           <div style="display:flex;align-items:center;gap:8px">
+            <span class="drag-grip" style="font-size:1.1rem;color:#166534;cursor:grab;margin-right:2px">⋮⋮</span>
             <span style="font-size:1.3rem">🎙️</span>
             <div>
               <strong style="display:block;font-size:0.95rem;color:#14532d">Ask SmartFarm</strong>
@@ -291,7 +292,7 @@
               <option value="en">🇬🇧 English</option>
               <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
             </select>
-            <button id="toggle-assistant-btn" class="ghost-btn" style="padding:2px 8px;font-size:0.9rem">_</button>
+            <button id="toggle-assistant-btn" class="ghost-btn" style="padding:2px 8px;font-size:0.9rem" title="Minimize / Expand">_</button>
           </div>
         </div>
         <div class="assistant-body" id="assistant-body">
@@ -322,6 +323,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
-    <script src="/static/app.js?v=20260911-1"></script>
+    <script src="/static/app.js?v=20260911-2"></script>
   </body>
 </html>
