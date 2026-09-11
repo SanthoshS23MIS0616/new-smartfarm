@@ -1,0 +1,2126 @@
+[
+  {
+    "crop_id": "CRP001",
+    "crop_name": "Rice",
+    "local_name": "நெல் / Paddy",
+    "scientific_name": "Oryza sativa",
+    "category": "Cereal",
+    "season_type": "Kharif/Rabi",
+    "crop_type": "annual",
+    "total_duration_days": 120,
+    "duration_range_days": "90-150",
+    "ideal_sowing_months": [
+      6,
+      7,
+      8,
+      11,
+      12
+    ],
+    "ideal_harvest_months": [
+      10,
+      11,
+      12,
+      3,
+      4
+    ],
+    "growth_stages": [
+      {
+        "stage": "Nursery & Sowing",
+        "days": "0-20",
+        "description": "Seed treatment with Pseudomonas (10g/kg), nursery raising"
+      },
+      {
+        "stage": "Transplanting & Vegetative",
+        "days": "20-45",
+        "description": "Transplanting at 2-3 seedlings/hill, tillering initiation"
+      },
+      {
+        "stage": "Panicle Initiation & Flowering",
+        "days": "45-80",
+        "description": "Active panicle emergence, critical water requirement"
+      },
+      {
+        "stage": "Grain Filling & Maturity",
+        "days": "80-120",
+        "description": "Dough stage, yellowing of panicles, pre-harvest drainage"
+      }
+    ],
+    "water_requirement_level": "High",
+    "total_water_requirement_mm": 1200,
+    "critical_irrigation_stages": [
+      "Panicle initiation",
+      "Flowering",
+      "Grain filling"
+    ],
+    "benchmark": {
+      "N": 79.89,
+      "P": 47.58,
+      "K": 39.87,
+      "temp_c": 23.69,
+      "humidity": 82.27,
+      "ph": 6.43,
+      "rainfall_mm": 236.18
+    },
+    "fertilizer_plan": {
+      "basal": "25% N + 100% P + 50% K (FYM 5 t/acre + DAP 50 kg + MOP 20 kg)",
+      "topdress_1": "Tillering (Day 25): 50% N (Urea 45 kg/acre)",
+      "topdress_2": "Panicle initiation (Day 50): 25% N + 50% K (Urea 25 kg + MOP 20 kg/acre)",
+      "organic_alternative": "Neem coated urea, Azospirillum, Phosphobacteria, FYM 5 t/acre",
+      "micronutrients": "Zinc sulphate 10 kg/acre basal application"
+    },
+    "costs_per_acre": {
+      "seed_inr": 2000,
+      "fertilizer_inr": 4500,
+      "pesticide_inr": 2000,
+      "labor_inr": 16000,
+      "irrigation_inr": 3000,
+      "machinery_inr": 6500,
+      "total_inr": 34000
+    },
+    "yield_kg_per_acre": "2000-3200",
+    "base_price_rs_per_kg": 24.0,
+    "price_range_rs_per_kg": [
+      20.0,
+      32.0
+    ],
+    "common_pests": [
+      "Stem borer",
+      "Leaf folder",
+      "Brown planthopper (BPH)"
+    ],
+    "common_diseases": [
+      "Blast",
+      "Bacterial leaf blight",
+      "Sheath blight"
+    ],
+    "ipm_practices": "Install pheromone traps (5/acre), release Trichogramma egg parasitoids, neem oil 3% spray."
+  },
+  {
+    "crop_id": "CRP002",
+    "crop_name": "Maize",
+    "local_name": "மக்காச்சோளம் / Maize",
+    "scientific_name": "Zea mays",
+    "category": "Cereal",
+    "season_type": "Kharif/Rabi",
+    "crop_type": "annual",
+    "total_duration_days": 105,
+    "duration_range_days": "90-120",
+    "ideal_sowing_months": [
+      2,
+      3,
+      6,
+      7,
+      10,
+      11
+    ],
+    "ideal_harvest_months": [
+      5,
+      6,
+      9,
+      10,
+      1,
+      2
+    ],
+    "growth_stages": [
+      {
+        "stage": "Germination & Seedling",
+        "days": "0-15",
+        "description": "Seedling emergence, weed management"
+      },
+      {
+        "stage": "Knee-High Vegetative",
+        "days": "15-45",
+        "description": "Rapid stem elongation, high nutrient demand"
+      },
+      {
+        "stage": "Tasseling & Silking",
+        "days": "45-65",
+        "description": "Pollen shed and silk emergence, critical moisture window"
+      },
+      {
+        "stage": "Grain Filling & Dent",
+        "days": "65-105",
+        "description": "Starch accumulation, husk browning, harvest maturity"
+      }
+    ],
+    "water_requirement_level": "Medium",
+    "total_water_requirement_mm": 600,
+    "critical_irrigation_stages": [
+      "Knee-high",
+      "Tasseling-silking",
+      "Grain filling"
+    ],
+    "benchmark": {
+      "N": 77.76,
+      "P": 48.44,
+      "K": 19.79,
+      "temp_c": 22.61,
+      "humidity": 65.92,
+      "ph": 6.26,
+      "rainfall_mm": 84.76
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 25% N + 50% K (DAP 50 kg + MOP 20 kg + Urea 20 kg/acre)",
+      "topdress_1": "Knee-high (Day 30): 50% N (Urea 45 kg/acre)",
+      "topdress_2": "Tasseling (Day 50): 25% N + 50% K (Urea 25 kg + MOP 20 kg/acre)",
+      "organic_alternative": "FYM 4 t/acre, Azospirillum, Phosphobacteria",
+      "micronutrients": "Zinc sulphate 10 kg/acre basal application"
+    },
+    "costs_per_acre": {
+      "seed_inr": 2800,
+      "fertilizer_inr": 5200,
+      "pesticide_inr": 2200,
+      "labor_inr": 12000,
+      "irrigation_inr": 2500,
+      "machinery_inr": 5300,
+      "total_inr": 30000
+    },
+    "yield_kg_per_acre": "2400-3800",
+    "base_price_rs_per_kg": 22.0,
+    "price_range_rs_per_kg": [
+      18.0,
+      27.0
+    ],
+    "common_pests": [
+      "Fall armyworm (FAW)",
+      "Stem borer",
+      "Shoot fly"
+    ],
+    "common_diseases": [
+      "Downy mildew",
+      "Turcicum leaf blight",
+      "Stalk rot"
+    ],
+    "ipm_practices": "Deep summer ploughing, pheromone traps (5/acre), Trichogramma cards, Beauveria bassiana drench."
+  },
+  {
+    "crop_id": "CRP003",
+    "crop_name": "Blackgram",
+    "local_name": "உளுந்து / Urad",
+    "scientific_name": "Vigna mungo",
+    "category": "Pulse",
+    "season_type": "Kharif/Rabi/Zaid",
+    "crop_type": "annual",
+    "total_duration_days": 70,
+    "duration_range_days": "60-80",
+    "ideal_sowing_months": [
+      2,
+      3,
+      6,
+      7,
+      9,
+      10,
+      1
+    ],
+    "ideal_harvest_months": [
+      4,
+      5,
+      8,
+      9,
+      11,
+      12,
+      3
+    ],
+    "growth_stages": [
+      {
+        "stage": "Germination & Vegetative",
+        "days": "0-25",
+        "description": "Seed germination, root nodulation with Rhizobium"
+      },
+      {
+        "stage": "Branching & Flowering",
+        "days": "25-45",
+        "description": "Flower initiation, foliar DAP 2% spray to boost setting"
+      },
+      {
+        "stage": "Pod Formation & Filling",
+        "days": "45-60",
+        "description": "Rapid pod elongation, moisture critical"
+      },
+      {
+        "stage": "Maturity & Picking",
+        "days": "60-70",
+        "description": "Pods turn black/brown, selective pod picking or whole plant harvest"
+      }
+    ],
+    "water_requirement_level": "Low-Medium",
+    "total_water_requirement_mm": 300,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Pod formation"
+    ],
+    "benchmark": {
+      "N": 40.02,
+      "P": 67.47,
+      "K": 19.24,
+      "temp_c": 29.97,
+      "humidity": 65.12,
+      "ph": 7.13,
+      "rainfall_mm": 67.88
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + starter N (DAP 40 kg + MOP 15 kg/acre)",
+      "topdress_1": "Flowering (Day 25-30): Foliar DAP 2% spray",
+      "topdress_2": "Pod setting (Day 40): Foliar TNAU Pulse Wonder 2 kg/acre",
+      "organic_alternative": "Rhizobium & Phosphobacteria bio-priming, FYM 2 t/acre",
+      "micronutrients": "Sulphur 10 kg/acre basal in deficient soils"
+    },
+    "costs_per_acre": {
+      "seed_inr": 1200,
+      "fertilizer_inr": 2500,
+      "pesticide_inr": 1500,
+      "labor_inr": 7500,
+      "irrigation_inr": 1000,
+      "machinery_inr": 3300,
+      "total_inr": 17000
+    },
+    "yield_kg_per_acre": "350-650",
+    "base_price_rs_per_kg": 66.0,
+    "price_range_rs_per_kg": [
+      55.0,
+      80.0
+    ],
+    "common_pests": [
+      "Whitefly",
+      "Spotted pod borer",
+      "Aphids",
+      "Thrips"
+    ],
+    "common_diseases": [
+      "Yellow Mosaic Virus (YMV)",
+      "Powdery mildew",
+      "Root rot"
+    ],
+    "ipm_practices": "Use YMV resistant cultivars (VBN 6/8), yellow sticky traps (10/acre), neem oil 3% spray."
+  },
+  {
+    "crop_id": "CRP004",
+    "crop_name": "Chickpea",
+    "local_name": "கொண்டைக்கடலை / Bengal gram",
+    "scientific_name": "Cicer arietinum",
+    "category": "Pulse",
+    "season_type": "Rabi",
+    "crop_type": "annual",
+    "total_duration_days": 100,
+    "duration_range_days": "90-110",
+    "ideal_sowing_months": [
+      10,
+      11,
+      12
+    ],
+    "ideal_harvest_months": [
+      1,
+      2,
+      3
+    ],
+    "growth_stages": [
+      {
+        "stage": "Seedling & Early Branching",
+        "days": "0-30",
+        "description": "Branching initiation, Rhizobium nodulation"
+      },
+      {
+        "stage": "Active Flowering",
+        "days": "30-60",
+        "description": "Peak flowering, avoid excessive moisture"
+      },
+      {
+        "stage": "Pod Development",
+        "days": "60-80",
+        "description": "Pod enlargement and seed filling"
+      },
+      {
+        "stage": "Maturity",
+        "days": "80-100",
+        "description": "Foliage yellowing, pod drying"
+      }
+    ],
+    "water_requirement_level": "Low",
+    "total_water_requirement_mm": 350,
+    "critical_irrigation_stages": [
+      "Pre-flowering",
+      "Pod filling"
+    ],
+    "benchmark": {
+      "N": 40.09,
+      "P": 67.79,
+      "K": 79.92,
+      "temp_c": 18.87,
+      "humidity": 16.86,
+      "ph": 7.34,
+      "rainfall_mm": 80.06
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + starter N (DAP 40 kg + MOP 20 kg/acre)",
+      "topdress_1": "Branching (Day 30): Foliar 2% urea/DAP if vegetative growth lags",
+      "topdress_2": "Pod setting (Day 60): 1% potassium nitrate foliar spray",
+      "organic_alternative": "Rhizobium + PSB culture, FYM 2 t/acre",
+      "micronutrients": "Zinc sulphate 10 kg/acre"
+    },
+    "costs_per_acre": {
+      "seed_inr": 2200,
+      "fertilizer_inr": 2800,
+      "pesticide_inr": 1600,
+      "labor_inr": 8000,
+      "irrigation_inr": 1200,
+      "machinery_inr": 3200,
+      "total_inr": 19000
+    },
+    "yield_kg_per_acre": "450-850",
+    "base_price_rs_per_kg": 56.0,
+    "price_range_rs_per_kg": [
+      48.0,
+      72.0
+    ],
+    "common_pests": [
+      "Helicoverpa pod borer",
+      "Cutworm",
+      "Semilooper"
+    ],
+    "common_diseases": [
+      "Fusarium wilt",
+      "Dry root rot",
+      "Ascochyta blight"
+    ],
+    "ipm_practices": "Install bird perches (20/acre), pheromone traps (5/acre), HaNPV spray, NSKE 5%."
+  },
+  {
+    "crop_id": "CRP005",
+    "crop_name": "Lentil",
+    "local_name": "மசூர் பருப்பு / Masoor",
+    "scientific_name": "Lens culinaris",
+    "category": "Pulse",
+    "season_type": "Rabi",
+    "crop_type": "annual",
+    "total_duration_days": 110,
+    "duration_range_days": "95-125",
+    "ideal_sowing_months": [
+      10,
+      11
+    ],
+    "ideal_harvest_months": [
+      2,
+      3
+    ],
+    "growth_stages": [
+      {
+        "stage": "Establishment",
+        "days": "0-25",
+        "description": "Seedling emergence in residual rice fallow moisture"
+      },
+      {
+        "stage": "Vegetative Branching",
+        "days": "25-50",
+        "description": "Branching and root nodule establishment"
+      },
+      {
+        "stage": "Flowering & Podding",
+        "days": "50-80",
+        "description": "High pollinator activity, pod formation"
+      },
+      {
+        "stage": "Maturity",
+        "days": "80-110",
+        "description": "Crop turns golden brown, pods firm and dry"
+      }
+    ],
+    "water_requirement_level": "Low",
+    "total_water_requirement_mm": 300,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Pod development"
+    ],
+    "benchmark": {
+      "N": 18.77,
+      "P": 68.36,
+      "K": 19.41,
+      "temp_c": 24.51,
+      "humidity": 64.8,
+      "ph": 6.99,
+      "rainfall_mm": 45.68
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + starter N (SSP 100 kg + MOP 15 kg + Urea 15 kg/acre)",
+      "topdress_1": "Flowering (Day 50): 2% urea foliar spray to arrest flower drop",
+      "topdress_2": "Pod filling (Day 70): 0.5% zinc-boron micronutrient spray",
+      "organic_alternative": "Rhizobium leguminosarum seed culture, FYM 2 t/acre",
+      "micronutrients": "Sulphur 10 kg/acre where deficient"
+    },
+    "costs_per_acre": {
+      "seed_inr": 1800,
+      "fertilizer_inr": 2400,
+      "pesticide_inr": 1400,
+      "labor_inr": 7000,
+      "irrigation_inr": 900,
+      "machinery_inr": 3000,
+      "total_inr": 16500
+    },
+    "yield_kg_per_acre": "400-750",
+    "base_price_rs_per_kg": 72.0,
+    "price_range_rs_per_kg": [
+      62.0,
+      85.0
+    ],
+    "common_pests": [
+      "Aphids",
+      "Pod borer"
+    ],
+    "common_diseases": [
+      "Wilt",
+      "Rust",
+      "Blight"
+    ],
+    "ipm_practices": "Yellow sticky cards for aphids, Trichoderma viride seed treatment, avoid spraying during bee foraging."
+  },
+  {
+    "crop_id": "CRP006",
+    "crop_name": "Cotton",
+    "local_name": "பருத்தி / Paruthi",
+    "scientific_name": "Gossypium spp.",
+    "category": "Fiber/Cash",
+    "season_type": "Kharif",
+    "crop_type": "annual",
+    "total_duration_days": 160,
+    "duration_range_days": "140-180",
+    "ideal_sowing_months": [
+      5,
+      6,
+      7
+    ],
+    "ideal_harvest_months": [
+      10,
+      11,
+      12,
+      1
+    ],
+    "growth_stages": [
+      {
+        "stage": "Seedling & Vegetative",
+        "days": "0-40",
+        "description": "Monopodial vegetative branching, weed control"
+      },
+      {
+        "stage": "Square Formation (Squaring)",
+        "days": "40-70",
+        "description": "Flower bud (square) development, sucking pest scouting"
+      },
+      {
+        "stage": "Flowering & Peak Boll Setting",
+        "days": "70-120",
+        "description": "High water and potassium requirement, bollworm risk"
+      },
+      {
+        "stage": "Boll Bursting & Picking",
+        "days": "120-160",
+        "description": "Multiple picking rounds as bolls open naturally"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 800,
+    "critical_irrigation_stages": [
+      "Squaring",
+      "Flowering",
+      "Boll development"
+    ],
+    "benchmark": {
+      "N": 117.77,
+      "P": 46.24,
+      "K": 19.56,
+      "temp_c": 23.99,
+      "humidity": 79.84,
+      "ph": 6.92,
+      "rainfall_mm": 80.09
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 25% N + 25% K (DAP 50 kg + MOP 20 kg + Urea 25 kg/acre)",
+      "topdress_1": "Squaring (Day 45): 50% N + 25% K (Urea 45 kg + MOP 20 kg/acre)",
+      "topdress_2": "Peak flowering (Day 75): 25% N + 50% K (Urea 25 kg + MOP 30 kg/acre)",
+      "organic_alternative": "FYM 5 t/acre, Neem cake 150 kg/acre",
+      "micronutrients": "Magnesium sulphate 10 kg/acre + Boron 0.1% foliar spray at boll stage"
+    },
+    "costs_per_acre": {
+      "seed_inr": 2500,
+      "fertilizer_inr": 6500,
+      "pesticide_inr": 4500,
+      "labor_inr": 18000,
+      "irrigation_inr": 3500,
+      "machinery_inr": 6500,
+      "total_inr": 41500
+    },
+    "yield_kg_per_acre": "800-1400",
+    "base_price_rs_per_kg": 65.0,
+    "price_range_rs_per_kg": [
+      55.0,
+      82.0
+    ],
+    "common_pests": [
+      "Pink bollworm",
+      "American bollworm",
+      "Whitefly",
+      "Thrips",
+      "Jassids"
+    ],
+    "common_diseases": [
+      "Bacterial blight",
+      "Fusarium wilt",
+      "Grey mildew"
+    ],
+    "ipm_practices": "Install pheromone traps (8/acre) for pink bollworm, yellow sticky traps, refuge planting, Trichogramma releases."
+  },
+  {
+    "crop_id": "CRP007",
+    "crop_name": "Jute",
+    "local_name": "சணல் / Sanal",
+    "scientific_name": "Corchorus spp.",
+    "category": "Fiber",
+    "season_type": "Kharif",
+    "crop_type": "annual",
+    "total_duration_days": 120,
+    "duration_range_days": "100-140",
+    "ideal_sowing_months": [
+      3,
+      4,
+      5
+    ],
+    "ideal_harvest_months": [
+      7,
+      8,
+      9
+    ],
+    "growth_stages": [
+      {
+        "stage": "Germination & Thinning",
+        "days": "0-20",
+        "description": "Direct line sowing, seedling thinning to 7-10 cm spacing"
+      },
+      {
+        "stage": "Rapid Vegetative Elongation",
+        "days": "20-70",
+        "description": "Rapid stem height growth, split nitrogen application"
+      },
+      {
+        "stage": "Fibre Accumulation",
+        "days": "70-100",
+        "description": "Secondary phloem fibre thickening in stems"
+      },
+      {
+        "stage": "Small Pod Maturity & Harvest",
+        "days": "100-120",
+        "description": "Harvest at 50% flowering for optimum tensile strength"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 600,
+    "critical_irrigation_stages": [
+      "Establishment",
+      "Active vegetative growth"
+    ],
+    "benchmark": {
+      "N": 78.4,
+      "P": 46.86,
+      "K": 39.99,
+      "temp_c": 24.96,
+      "humidity": 79.64,
+      "ph": 6.73,
+      "rainfall_mm": 174.79
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + 30% N (DAP 35 kg + MOP 20 kg + Urea 20 kg/acre)",
+      "topdress_1": "Vegetative (Day 25): 35% N (Urea 30 kg/acre) after weeding",
+      "topdress_2": "Vegetative (Day 45): 35% N (Urea 30 kg/acre) before canopy closes",
+      "organic_alternative": "FYM 3 t/acre, green manuring residues",
+      "micronutrients": "Zinc sulphate 8 kg/acre in sandy loam"
+    },
+    "costs_per_acre": {
+      "seed_inr": 1100,
+      "fertilizer_inr": 3200,
+      "pesticide_inr": 1200,
+      "labor_inr": 13000,
+      "irrigation_inr": 1800,
+      "machinery_inr": 4200,
+      "total_inr": 24500
+    },
+    "yield_kg_per_acre": "1000-1600",
+    "base_price_rs_per_kg": 50.0,
+    "price_range_rs_per_kg": [
+      42.0,
+      60.0
+    ],
+    "common_pests": [
+      "Semilooper",
+      "Hairy caterpillar",
+      "Yellow mite",
+      "Stem weevil"
+    ],
+    "common_diseases": [
+      "Stem rot",
+      "Root rot",
+      "Anthracnose"
+    ],
+    "ipm_practices": "Light traps for moth collection, clipping egg masses from leaf tips, clean retting water management."
+  },
+  {
+    "crop_id": "CRP008",
+    "crop_name": "Mungbean",
+    "local_name": "பாசிப்பயறு / Green gram",
+    "scientific_name": "Vigna radiata",
+    "category": "Pulse",
+    "season_type": "Kharif/Rabi/Zaid",
+    "crop_type": "annual",
+    "total_duration_days": 65,
+    "duration_range_days": "55-75",
+    "ideal_sowing_months": [
+      2,
+      3,
+      6,
+      7,
+      10,
+      11
+    ],
+    "ideal_harvest_months": [
+      4,
+      5,
+      8,
+      9,
+      12,
+      1
+    ],
+    "growth_stages": [
+      {
+        "stage": "Emergence & Trifoliate",
+        "days": "0-20",
+        "description": "Seedling emergence, nodule establishment"
+      },
+      {
+        "stage": "Flowering Initiation",
+        "days": "20-40",
+        "description": "Profuse flowering, DAP 2% spray to enhance setting"
+      },
+      {
+        "stage": "Pod Elongation",
+        "days": "40-55",
+        "description": "Pod maturation, moisture stress mitigation"
+      },
+      {
+        "stage": "Pod Drying & Picking",
+        "days": "55-65",
+        "description": "Pods mature brown/black, 1-2 picking rounds"
+      }
+    ],
+    "water_requirement_level": "Low",
+    "total_water_requirement_mm": 280,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Pod setting"
+    ],
+    "benchmark": {
+      "N": 20.99,
+      "P": 47.28,
+      "K": 19.87,
+      "temp_c": 28.27,
+      "humidity": 85.95,
+      "ph": 6.74,
+      "rainfall_mm": 48.44
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + starter N (DAP 35 kg + MOP 15 kg/acre)",
+      "topdress_1": "Flowering (Day 25-30): Foliar DAP 2% spray",
+      "topdress_2": "Pod stage (Day 40): Foliar TNAU Pulse Wonder 2 kg/acre",
+      "organic_alternative": "Rhizobium seed treatment, FYM 2 t/acre",
+      "micronutrients": "Zinc sulphate 5 kg/acre in sandy soils"
+    },
+    "costs_per_acre": {
+      "seed_inr": 1200,
+      "fertilizer_inr": 2300,
+      "pesticide_inr": 1300,
+      "labor_inr": 7000,
+      "irrigation_inr": 900,
+      "machinery_inr": 3100,
+      "total_inr": 15800
+    },
+    "yield_kg_per_acre": "300-550",
+    "base_price_rs_per_kg": 66.0,
+    "price_range_rs_per_kg": [
+      58.0,
+      78.0
+    ],
+    "common_pests": [
+      "Whitefly",
+      "Thrips",
+      "Aphids",
+      "Spotted pod borer"
+    ],
+    "common_diseases": [
+      "Yellow Mosaic Virus (YMV)",
+      "Cercospora leaf spot",
+      "Powdery mildew"
+    ],
+    "ipm_practices": "Use YMV resistant cultivars (CO 8, VBN 3), yellow sticky traps (10/acre), neem seed kernel extract (NSKE 5%)."
+  },
+  {
+    "crop_id": "CRP009",
+    "crop_name": "Pigeonpeas",
+    "local_name": "துவரை / Red gram / Arhar",
+    "scientific_name": "Cajanus cajan",
+    "category": "Pulse",
+    "season_type": "Kharif",
+    "crop_type": "annual",
+    "total_duration_days": 150,
+    "duration_range_days": "120-180",
+    "ideal_sowing_months": [
+      6,
+      7,
+      9
+    ],
+    "ideal_harvest_months": [
+      11,
+      12,
+      1,
+      2
+    ],
+    "growth_stages": [
+      {
+        "stage": "Seedling & Deep Rooting",
+        "days": "0-40",
+        "description": "Slow above-ground growth, deep taproot expansion"
+      },
+      {
+        "stage": "Vegetative Branching",
+        "days": "40-80",
+        "description": "Profuse lateral branching, intercropping harvest"
+      },
+      {
+        "stage": "Flowering & Pod Setting",
+        "days": "80-120",
+        "description": "Heavy flowering, critical borer management window"
+      },
+      {
+        "stage": "Pod Maturity & Harvest",
+        "days": "120-150",
+        "description": "Pods turn brown, whole plant cutting and threshing"
+      }
+    ],
+    "water_requirement_level": "Low-Medium",
+    "total_water_requirement_mm": 500,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Pod development"
+    ],
+    "benchmark": {
+      "N": 20.73,
+      "P": 67.73,
+      "K": 20.29,
+      "temp_c": 27.74,
+      "humidity": 48.06,
+      "ph": 5.79,
+      "rainfall_mm": 149.46
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + starter N (DAP 45 kg + MOP 20 kg/acre)",
+      "topdress_1": "Flowering (Day 70): Foliar Pulse Wonder / DAP 2% spray",
+      "topdress_2": "Pod setting (Day 95): 1% potassium nitrate foliar spray",
+      "organic_alternative": "Rhizobium + Trichoderma culture, FYM 2 t/acre",
+      "micronutrients": "Zinc sulphate 10 kg + Borax 4 kg/acre"
+    },
+    "costs_per_acre": {
+      "seed_inr": 1600,
+      "fertilizer_inr": 3000,
+      "pesticide_inr": 2000,
+      "labor_inr": 9000,
+      "irrigation_inr": 1500,
+      "machinery_inr": 3900,
+      "total_inr": 21000
+    },
+    "yield_kg_per_acre": "450-850",
+    "base_price_rs_per_kg": 62.0,
+    "price_range_rs_per_kg": [
+      55.0,
+      78.0
+    ],
+    "common_pests": [
+      "Gram pod borer (Helicoverpa)",
+      "Plume moth",
+      "Pod fly",
+      "Blister beetle"
+    ],
+    "common_diseases": [
+      "Sterility mosaic disease",
+      "Fusarium wilt",
+      "Phytophthora blight"
+    ],
+    "ipm_practices": "Install bird perches (20/acre), pheromone traps (5/acre), intercrop with sorghum, spray HaNPV."
+  },
+  {
+    "crop_id": "CRP010",
+    "crop_name": "Kidneybeans",
+    "local_name": "ராஜ்மாஷ் / Rajma",
+    "scientific_name": "Phaseolus vulgaris",
+    "category": "Pulse",
+    "season_type": "Rabi/Summer",
+    "crop_type": "annual",
+    "total_duration_days": 95,
+    "duration_range_days": "85-115",
+    "ideal_sowing_months": [
+      10,
+      11,
+      1,
+      2
+    ],
+    "ideal_harvest_months": [
+      1,
+      2,
+      4,
+      5
+    ],
+    "growth_stages": [
+      {
+        "stage": "Germination & Stand",
+        "days": "0-15",
+        "description": "Epigeal emergence, sensitive to surface crusting"
+      },
+      {
+        "stage": "Vegetative Growth",
+        "days": "15-40",
+        "description": "Bush/climber leaf production, top-dress N application"
+      },
+      {
+        "stage": "Flowering & Podding",
+        "days": "40-70",
+        "description": "High water sensitivity, pod elongation"
+      },
+      {
+        "stage": "Maturity",
+        "days": "70-95",
+        "description": "Leaves drop, pods dry and rattle, threshing"
+      }
+    ],
+    "water_requirement_level": "Medium",
+    "total_water_requirement_mm": 400,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Pod filling"
+    ],
+    "benchmark": {
+      "N": 20.75,
+      "P": 67.54,
+      "K": 20.05,
+      "temp_c": 20.05,
+      "humidity": 21.61,
+      "ph": 5.78,
+      "rainfall_mm": 105.92
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + 50% N (DAP 50 kg + MOP 25 kg + Urea 25 kg/acre)",
+      "topdress_1": "Vegetative (Day 25): 25% N (Urea 20 kg/acre)",
+      "topdress_2": "Flowering (Day 45): 25% N (Urea 20 kg/acre) with irrigation",
+      "organic_alternative": "FYM 4 t/acre, Rhizobium phaseoli strain inoculation",
+      "micronutrients": "Zinc sulphate 10 kg/acre basal"
+    },
+    "costs_per_acre": {
+      "seed_inr": 3200,
+      "fertilizer_inr": 3800,
+      "pesticide_inr": 1800,
+      "labor_inr": 9500,
+      "irrigation_inr": 2000,
+      "machinery_inr": 3700,
+      "total_inr": 24000
+    },
+    "yield_kg_per_acre": "500-900",
+    "base_price_rs_per_kg": 70.0,
+    "price_range_rs_per_kg": [
+      60.0,
+      88.0
+    ],
+    "common_pests": [
+      "Bean fly",
+      "Aphids",
+      "Cutworm",
+      "Pod borer"
+    ],
+    "common_diseases": [
+      "Anthracnose",
+      "Rust",
+      "Bacterial blight",
+      "Root rot"
+    ],
+    "ipm_practices": "Seed treatment with Trichoderma (10g/kg), raised bed sowing, yellow sticky cards, copper hydroxide sprays."
+  },
+  {
+    "crop_id": "CRP011",
+    "crop_name": "Mothbeans",
+    "local_name": "மொத் பயறு / Moth",
+    "scientific_name": "Vigna aconitifolia",
+    "category": "Pulse",
+    "season_type": "Kharif",
+    "crop_type": "annual",
+    "total_duration_days": 70,
+    "duration_range_days": "60-80",
+    "ideal_sowing_months": [
+      6,
+      7,
+      8,
+      9
+    ],
+    "ideal_harvest_months": [
+      9,
+      10,
+      11
+    ],
+    "growth_stages": [
+      {
+        "stage": "Establishment",
+        "days": "0-15",
+        "description": "Fast germination under arid warm conditions"
+      },
+      {
+        "stage": "Spreading Canopy",
+        "days": "15-35",
+        "description": "Dense prostrate ground cover, prevents soil erosion"
+      },
+      {
+        "stage": "Flowering & Podding",
+        "days": "35-55",
+        "description": "Yellow flower clusters, pod set under moisture stress"
+      },
+      {
+        "stage": "Maturity",
+        "days": "55-70",
+        "description": "Harvest before pod shattering"
+      }
+    ],
+    "water_requirement_level": "Low",
+    "total_water_requirement_mm": 220,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Pod filling"
+    ],
+    "benchmark": {
+      "N": 21.44,
+      "P": 48.01,
+      "K": 20.23,
+      "temp_c": 28.52,
+      "humidity": 53.16,
+      "ph": 6.85,
+      "rainfall_mm": 51.22
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 100% K + starter N (SSP 75 kg + MOP 15 kg + Urea 15 kg/acre)",
+      "topdress_1": "Flowering (Day 35): 1% potassium sulphate / DAP foliar spray",
+      "topdress_2": "None required under standard dryland management",
+      "organic_alternative": "Rhizobium culture, FYM 2 t/acre",
+      "micronutrients": "Zinc sulphate 5 kg/acre in sandy soils"
+    },
+    "costs_per_acre": {
+      "seed_inr": 1000,
+      "fertilizer_inr": 1800,
+      "pesticide_inr": 900,
+      "labor_inr": 5500,
+      "irrigation_inr": 500,
+      "machinery_inr": 2800,
+      "total_inr": 12500
+    },
+    "yield_kg_per_acre": "300-500",
+    "base_price_rs_per_kg": 58.0,
+    "price_range_rs_per_kg": [
+      50.0,
+      70.0
+    ],
+    "common_pests": [
+      "Pod borer",
+      "Whitefly",
+      "Jassid"
+    ],
+    "common_diseases": [
+      "Yellow mosaic",
+      "Dry root rot"
+    ],
+    "ipm_practices": "Drought-hardy varieties (RMO-40), seed bio-priming, timely weed clearance, light traps."
+  },
+  {
+    "crop_id": "CRP012",
+    "crop_name": "Watermelon",
+    "local_name": "தர்பூசணி / Tharpoosani",
+    "scientific_name": "Citrullus lanatus",
+    "category": "Fruit/Vegetable",
+    "season_type": "Zaid/Summer",
+    "crop_type": "annual",
+    "total_duration_days": 85,
+    "duration_range_days": "75-100",
+    "ideal_sowing_months": [
+      1,
+      2,
+      3,
+      10,
+      11
+    ],
+    "ideal_harvest_months": [
+      4,
+      5,
+      6,
+      1,
+      2
+    ],
+    "growth_stages": [
+      {
+        "stage": "Germination & Vine Emergence",
+        "days": "0-20",
+        "description": "Direct seeding on raised beds with silver mulch"
+      },
+      {
+        "stage": "Vegetative Vine Running",
+        "days": "20-40",
+        "description": "Rapid runner expansion, fertigation split 1"
+      },
+      {
+        "stage": "Flowering & Fruit Set",
+        "days": "40-60",
+        "description": "Bee pollination vital, fruit set, calcium-boron spray"
+      },
+      {
+        "stage": "Fruit Bulking & Ripening",
+        "days": "60-85",
+        "description": "High potassium fertigation, withhold water 4 days before harvest"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 500,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Fruit set",
+      "Fruit enlargement"
+    ],
+    "benchmark": {
+      "N": 99.42,
+      "P": 17.0,
+      "K": 50.22,
+      "temp_c": 25.59,
+      "humidity": 85.16,
+      "ph": 6.5,
+      "rainfall_mm": 50.79
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 30% N + 30% K (DAP 40 kg + MOP 20 kg + Urea 20 kg/acre)",
+      "topdress_1": "Vine development (Day 25): 40% N + 30% K through drip",
+      "topdress_2": "Fruit sizing (Day 45): 30% N + 40% K (0-0-50 SOP) through drip",
+      "organic_alternative": "FYM 6 t/acre, Neem cake 150 kg/acre",
+      "micronutrients": "Boron 0.1% + Calcium nitrate spray at fruit set"
+    },
+    "costs_per_acre": {
+      "seed_inr": 3500,
+      "fertilizer_inr": 5800,
+      "pesticide_inr": 2800,
+      "labor_inr": 12000,
+      "irrigation_inr": 3000,
+      "machinery_inr": 4900,
+      "total_inr": 32000
+    },
+    "yield_kg_per_acre": "8000-14000",
+    "base_price_rs_per_kg": 12.0,
+    "price_range_rs_per_kg": [
+      8.0,
+      18.0
+    ],
+    "common_pests": [
+      "Fruit fly",
+      "Aphids",
+      "Red pumpkin beetle",
+      "Thrips"
+    ],
+    "common_diseases": [
+      "Downy mildew",
+      "Powdery mildew",
+      "Fusarium wilt"
+    ],
+    "ipm_practices": "Install cue-lure fruit fly traps (6/acre), silver reflective mulch, Trichoderma drenching at root zone."
+  },
+  {
+    "crop_id": "CRP013",
+    "crop_name": "Muskmelon",
+    "local_name": "முலாம்பழம் / Muskmelon",
+    "scientific_name": "Cucumis melo",
+    "category": "Fruit/Vegetable",
+    "season_type": "Zaid/Summer",
+    "crop_type": "annual",
+    "total_duration_days": 80,
+    "duration_range_days": "70-95",
+    "ideal_sowing_months": [
+      1,
+      2,
+      3,
+      10,
+      11
+    ],
+    "ideal_harvest_months": [
+      4,
+      5,
+      6,
+      12,
+      1
+    ],
+    "growth_stages": [
+      {
+        "stage": "Seedling & Bed Establishment",
+        "days": "0-15",
+        "description": "Sowing on mulch beds, drip installation"
+      },
+      {
+        "stage": "Vine Growth & Branching",
+        "days": "15-35",
+        "description": "Lateral branch pinching for concentrated fruiting"
+      },
+      {
+        "stage": "Flowering & Fruit Setting",
+        "days": "35-55",
+        "description": "Honeybee pollination, fruit thinning to 2-3 fruits/vine"
+      },
+      {
+        "stage": "Netting & Maturity",
+        "days": "55-80",
+        "description": "Rind netting development, harvest at slip stage"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 450,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Fruit set",
+      "Fruit netting"
+    ],
+    "benchmark": {
+      "N": 100.32,
+      "P": 17.72,
+      "K": 50.08,
+      "temp_c": 28.66,
+      "humidity": 92.34,
+      "ph": 6.36,
+      "rainfall_mm": 24.69
+    },
+    "fertilizer_plan": {
+      "basal": "100% P + 30% N + 30% K (DAP 35 kg + MOP 20 kg + Urea 20 kg/acre)",
+      "topdress_1": "Vine development (Day 20): 35% N + 30% K (19-19-19 soluble)",
+      "topdress_2": "Fruit netting (Day 45): 35% N + 40% K (0-0-50 SOP)",
+      "organic_alternative": "FYM 5 t/acre, bio-fertilizers",
+      "micronutrients": "Boron 0.2% foliar spray at flowering"
+    },
+    "costs_per_acre": {
+      "seed_inr": 3200,
+      "fertilizer_inr": 5500,
+      "pesticide_inr": 2600,
+      "labor_inr": 11000,
+      "irrigation_inr": 2800,
+      "machinery_inr": 4400,
+      "total_inr": 29500
+    },
+    "yield_kg_per_acre": "6000-10000",
+    "base_price_rs_per_kg": 15.0,
+    "price_range_rs_per_kg": [
+      10.0,
+      24.0
+    ],
+    "common_pests": [
+      "Fruit fly",
+      "Aphids",
+      "Serpentine leaf miner",
+      "Whitefly"
+    ],
+    "common_diseases": [
+      "Powdery mildew",
+      "Downy mildew",
+      "Collar rot"
+    ],
+    "ipm_practices": "Cue-lure fruit fly traps (6/acre), reflective mulching, neem oil 3% spray, field sanitation."
+  },
+  {
+    "crop_id": "CRP014",
+    "crop_name": "Pomegranate",
+    "local_name": "மாதுளை / Maathulai",
+    "scientific_name": "Punica granatum",
+    "category": "Fruit",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 240,
+    "duration_range_days": "200-270",
+    "ideal_sowing_months": [
+      1,
+      2,
+      6,
+      7,
+      9,
+      10
+    ],
+    "ideal_harvest_months": [
+      7,
+      8,
+      12,
+      1,
+      3,
+      4
+    ],
+    "growth_stages": [
+      {
+        "stage": "Pruning & Defoliation",
+        "days": "0-30",
+        "description": "Bahar treatment, light water stress, sanitizing pruning"
+      },
+      {
+        "stage": "Flushing & Flowering",
+        "days": "30-75",
+        "description": "Hermaphrodite flower emergence, bee pollination"
+      },
+      {
+        "stage": "Fruit Sizing & Bagging",
+        "days": "75-180",
+        "description": "Fruit bagging for borer protection, fertigation splits"
+      },
+      {
+        "stage": "Aril Coloring & Maturity",
+        "days": "180-240",
+        "description": "Color break, calyx drying, selective harvesting"
+      }
+    ],
+    "water_requirement_level": "Medium",
+    "total_water_requirement_mm": 750,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Fruit set",
+      "Aril development"
+    ],
+    "benchmark": {
+      "N": 18.87,
+      "P": 18.75,
+      "K": 40.21,
+      "temp_c": 21.84,
+      "humidity": 90.13,
+      "ph": 6.43,
+      "rainfall_mm": 107.53
+    },
+    "fertilizer_plan": {
+      "basal": "Bahar initiation: FYM 20 kg/tree + 100% P + 25% N + 25% K",
+      "topdress_1": "Fruit set (Day 60): 50% N + 25% K via drip fertigation",
+      "topdress_2": "Aril sizing (Day 110): 25% N + 50% K (SOP 0-0-50)",
+      "organic_alternative": "FYM 10 t/acre, Vermicompost 2 t/acre, Neem cake",
+      "micronutrients": "Zinc, Boron, Chelated Iron foliar sprays"
+    },
+    "costs_per_acre": {
+      "seed_inr": 12000,
+      "fertilizer_inr": 12000,
+      "pesticide_inr": 8500,
+      "labor_inr": 19000,
+      "irrigation_inr": 4500,
+      "machinery_inr": 6000,
+      "total_inr": 62000
+    },
+    "yield_kg_per_acre": "4000-7500",
+    "base_price_rs_per_kg": 78.0,
+    "price_range_rs_per_kg": [
+      60.0,
+      105.0
+    ],
+    "common_pests": [
+      "Anar butterfly (Deudorix)",
+      "Thrips",
+      "Mites",
+      "Stem borer"
+    ],
+    "common_diseases": [
+      "Bacterial blight (Teliya)",
+      "Fusarium wilt",
+      "Anthracnose"
+    ],
+    "ipm_practices": "Paper bagging of fruits at marble size, sanitizing secateurs in sodium hypochlorite, pheromone traps, light traps."
+  },
+  {
+    "crop_id": "CRP015",
+    "crop_name": "Banana",
+    "local_name": "வாழை / Vazhai",
+    "scientific_name": "Musa spp.",
+    "category": "Fruit",
+    "season_type": "Perennial/Year-round",
+    "crop_type": "perennial",
+    "total_duration_days": 330,
+    "duration_range_days": "300-360",
+    "ideal_sowing_months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "ideal_harvest_months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "growth_stages": [
+      {
+        "stage": "Establishment & Vegetative",
+        "days": "0-150",
+        "description": "Rapid pseudostem growth, desuckering, fortnightly fertigation"
+      },
+      {
+        "stage": "Shooting & Bunch Emergence",
+        "days": "150-240",
+        "description": "Inflorescence emergence, removal of male bud (denavelling)"
+      },
+      {
+        "stage": "Bunch Filling & Propping",
+        "days": "240-300",
+        "description": "Heavy potassium demand, propping with bamboo/casuarina poles"
+      },
+      {
+        "stage": "Bunch Maturity & Harvesting",
+        "days": "300-330",
+        "description": "Fingers round off, angles vanish, bunch sleeve harvest"
+      }
+    ],
+    "water_requirement_level": "High",
+    "total_water_requirement_mm": 1600,
+    "critical_irrigation_stages": [
+      "Shooting",
+      "Bunch emergence",
+      "Bunch filling"
+    ],
+    "benchmark": {
+      "N": 100.23,
+      "P": 82.01,
+      "K": 50.05,
+      "temp_c": 27.38,
+      "humidity": 80.36,
+      "ph": 5.98,
+      "rainfall_mm": 104.63
+    },
+    "fertilizer_plan": {
+      "basal": "FYM 10 kg/plant + 100% P at planting pit",
+      "topdress_1": "Months 2-5: Split N and K fortnightly through drip",
+      "topdress_2": "Months 6-8 (Bunching): High potassium fertigation (SOP/MOP)",
+      "organic_alternative": "FYM 12 t/acre, Vermicompost, Sunnhemp green manure in interspaces",
+      "micronutrients": "TNAU Banana Shakti 20g/plant or Zinc + Boron foliar spray"
+    },
+    "costs_per_acre": {
+      "seed_inr": 16000,
+      "fertilizer_inr": 18000,
+      "pesticide_inr": 5500,
+      "labor_inr": 26000,
+      "irrigation_inr": 6500,
+      "machinery_inr": 7000,
+      "total_inr": 79000
+    },
+    "yield_kg_per_acre": "16000-28000",
+    "base_price_rs_per_kg": 14.0,
+    "price_range_rs_per_kg": [
+      11.0,
+      20.0
+    ],
+    "common_pests": [
+      "Pseudostem weevil",
+      "Rhizome weevil",
+      "Banana aphid",
+      "Nematodes"
+    ],
+    "common_diseases": [
+      "Panama wilt (Fusarium)",
+      "Sigatoka leaf spot",
+      "Bunchy top virus"
+    ],
+    "ipm_practices": "Plant certified tissue-culture plants, stem injector traps for weevils, systemic leaf de-trashing, Trichoderma drenching."
+  },
+  {
+    "crop_id": "CRP016",
+    "crop_name": "Coconut",
+    "local_name": "தேங்காய் / Thengai",
+    "scientific_name": "Cocos nucifera",
+    "category": "Plantation",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 365,
+    "duration_range_days": "Continuous bearing (5-7 yrs establishment)",
+    "ideal_sowing_months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "ideal_harvest_months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "growth_stages": [
+      {
+        "stage": "Pre-Monsoon Fertilizer Round",
+        "days": "May-Jun",
+        "description": "Application of organic manure, 50% N, full P, 50% K"
+      },
+      {
+        "stage": "Post-Monsoon Fertilizer Round",
+        "days": "Sep-Oct",
+        "description": "Application of remaining 50% N and 50% K in basin"
+      },
+      {
+        "stage": "Continuous Button Development",
+        "days": "Year-round",
+        "description": "Monthly bunch emergence, button shedding management"
+      },
+      {
+        "stage": "Monthly Harvesting Cycle",
+        "days": "Every 35-45 days",
+        "description": "Harvesting fully mature 11-12 month-old nuts"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 1300,
+    "critical_irrigation_stages": [
+      "Button setting",
+      "Summer dry months"
+    ],
+    "benchmark": {
+      "N": 21.98,
+      "P": 16.93,
+      "K": 30.59,
+      "temp_c": 27.41,
+      "humidity": 94.84,
+      "ph": 5.98,
+      "rainfall_mm": 175.69
+    },
+    "fertilizer_plan": {
+      "basal": "Pre-monsoon (May-Jun): 50% N + 100% P + 50% K + 50 kg FYM/palm",
+      "topdress_1": "Post-monsoon (Sep-Oct): 50% N + 50% K in circular basin",
+      "topdress_2": "Summer: Micronutrient tonic root feeding",
+      "organic_alternative": "FYM 50 kg/palm/year, Calopogonium / Sunnhemp cover crop",
+      "micronutrients": "Magnesium sulphate 500g/palm + TNAU Coconut Tonic (root feeding)"
+    },
+    "costs_per_acre": {
+      "seed_inr": 4000,
+      "fertilizer_inr": 12000,
+      "pesticide_inr": 4000,
+      "labor_inr": 15000,
+      "irrigation_inr": 5000,
+      "machinery_inr": 4000,
+      "total_inr": 44000
+    },
+    "yield_kg_per_acre": "6000-9000 nuts",
+    "base_price_rs_per_kg": 54.0,
+    "price_range_rs_per_kg": [
+      42.0,
+      72.0
+    ],
+    "common_pests": [
+      "Rhinoceros beetle",
+      "Red palm weevil",
+      "Eriophyid mite",
+      "Black headed caterpillar"
+    ],
+    "common_diseases": [
+      "Basal stem rot (Thanjavur wilt)",
+      "Bud rot",
+      "Leaf blight"
+    ],
+    "ipm_practices": "Ferrugineol pheromone traps for red palm weevil, crown cleaning, Metarhizium green muscardine fungus, root feeding."
+  },
+  {
+    "crop_id": "CRP017",
+    "crop_name": "Apple",
+    "local_name": "ஆப்பிள் / Apple",
+    "scientific_name": "Malus domestica",
+    "category": "Fruit",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 150,
+    "duration_range_days": "130-165 (bloom to harvest)",
+    "ideal_sowing_months": [
+      7,
+      8
+    ],
+    "ideal_harvest_months": [
+      8,
+      9,
+      10
+    ],
+    "growth_stages": [
+      {
+        "stage": "Winter Dormancy",
+        "days": "Nov-Feb",
+        "description": "Chilling requirement accumulation (<7°C), winter pruning"
+      },
+      {
+        "stage": "Bud Burst & Pink Bud",
+        "days": "Mar-Apr",
+        "description": "Flower emergence, honeybee colony placement"
+      },
+      {
+        "stage": "Petal Fall & Fruit Set",
+        "days": "Apr-May",
+        "description": "Early cell division, scab prevention sprays"
+      },
+      {
+        "stage": "Fruit Sizing & Coloration",
+        "days": "Jun-Aug",
+        "description": "Calcium sprays against bitter pit, color development"
+      }
+    ],
+    "water_requirement_level": "Medium",
+    "total_water_requirement_mm": 800,
+    "critical_irrigation_stages": [
+      "Petal fall",
+      "Fruit sizing"
+    ],
+    "benchmark": {
+      "N": 20.8,
+      "P": 134.22,
+      "K": 199.89,
+      "temp_c": 22.63,
+      "humidity": 92.33,
+      "ph": 5.93,
+      "rainfall_mm": 112.65
+    },
+    "fertilizer_plan": {
+      "basal": "Dormant season (Dec-Jan): Full FYM + 100% P + 50% K",
+      "topdress_1": "Post-bloom (May): 50% N + 25% K",
+      "topdress_2": "Fruit sizing (Jun-Jul): 50% N + 25% K",
+      "organic_alternative": "FYM 35 kg/tree/year, Vermicompost",
+      "micronutrients": "Calcium chloride 0.5% + Boron 0.1% at pink bud"
+    },
+    "costs_per_acre": {
+      "seed_inr": 18000,
+      "fertilizer_inr": 16000,
+      "pesticide_inr": 12000,
+      "labor_inr": 25000,
+      "irrigation_inr": 5000,
+      "machinery_inr": 7000,
+      "total_inr": 83000
+    },
+    "yield_kg_per_acre": "5000-9000",
+    "base_price_rs_per_kg": 34.0,
+    "price_range_rs_per_kg": [
+      28.0,
+      48.0
+    ],
+    "common_pests": [
+      "San Jose scale",
+      "Woolly apple aphid",
+      "Spider mites",
+      "Codling moth"
+    ],
+    "common_diseases": [
+      "Apple scab (Venturia inaequalis)",
+      "Powdery mildew",
+      "Canker"
+    ],
+    "ipm_practices": "Weather-based scab warning monitoring, pheromone mating disruption, dormant oil sprays, predator mites."
+  },
+  {
+    "crop_id": "CRP018",
+    "crop_name": "Coffee",
+    "local_name": "காபி / Kaapi",
+    "scientific_name": "Coffea spp.",
+    "category": "Plantation",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 210,
+    "duration_range_days": "180-240",
+    "ideal_sowing_months": [
+      6,
+      7,
+      8
+    ],
+    "ideal_harvest_months": [
+      11,
+      12,
+      1,
+      2
+    ],
+    "growth_stages": [
+      {
+        "stage": "Blossom & Fruit Set",
+        "days": "Mar-Apr",
+        "description": "Blossom shower triggers synchronous flowering"
+      },
+      {
+        "stage": "Berry Development & Expansion",
+        "days": "May-Aug",
+        "description": "Berry enlargement, backing showers, shade lopping"
+      },
+      {
+        "stage": "Bean Hardening & Ripening",
+        "days": "Sep-Nov",
+        "description": "Endosperm hardening, berries turn crimson red"
+      },
+      {
+        "stage": "Selective Hand Picking",
+        "days": "Nov-Jan",
+        "description": "Multiple selective picking rounds of ripe berries only"
+      }
+    ],
+    "water_requirement_level": "Medium",
+    "total_water_requirement_mm": 1400,
+    "critical_irrigation_stages": [
+      "Blossom trigger",
+      "Berry expansion"
+    ],
+    "benchmark": {
+      "N": 101.2,
+      "P": 28.74,
+      "K": 29.94,
+      "temp_c": 25.54,
+      "humidity": 58.87,
+      "ph": 6.81,
+      "rainfall_mm": 158.07
+    },
+    "fertilizer_plan": {
+      "basal": "Pre-monsoon (Mar-Apr): 40% N + 100% P + 40% K + organic manure",
+      "topdress_1": "Mid-monsoon (Aug-Sep): 30% N + 30% K",
+      "topdress_2": "Post-monsoon (Oct-Nov): 30% N + 30% K",
+      "organic_alternative": "Composted coffee pulp, FYM 6 t/acre, leaf litter mulch",
+      "micronutrients": "Zinc sulphate 0.25% + Urea 0.5% foliar spray"
+    },
+    "costs_per_acre": {
+      "seed_inr": 8000,
+      "fertilizer_inr": 9000,
+      "pesticide_inr": 4500,
+      "labor_inr": 18000,
+      "irrigation_inr": 3000,
+      "machinery_inr": 4500,
+      "total_inr": 47000
+    },
+    "yield_kg_per_acre": "400-850 clean bean",
+    "base_price_rs_per_kg": 210.0,
+    "price_range_rs_per_kg": [
+      170.0,
+      270.0
+    ],
+    "common_pests": [
+      "Coffee berry borer",
+      "White stem borer",
+      "Shot hole borer"
+    ],
+    "common_diseases": [
+      "Coffee leaf rust",
+      "Black rot",
+      "Root rot"
+    ],
+    "ipm_practices": "Install Broca traps with alcohol lures (20/acre), stem tracing and bark scrubbing, Bordeaux mixture 0.5% for rust."
+  },
+  {
+    "crop_id": "CRP019",
+    "crop_name": "Grapes",
+    "local_name": "திராட்சை / Thiraatchai",
+    "scientific_name": "Vitis vinifera",
+    "category": "Fruit",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 135,
+    "duration_range_days": "120-150",
+    "ideal_sowing_months": [
+      10,
+      11,
+      12
+    ],
+    "ideal_harvest_months": [
+      2,
+      3,
+      4
+    ],
+    "growth_stages": [
+      {
+        "stage": "Pruning & Sprouting",
+        "days": "0-20",
+        "description": "Forward fruit pruning, hydrogen cyanamide bud break spray"
+      },
+      {
+        "stage": "Inflorescence & Capfall",
+        "days": "20-40",
+        "description": "Bunch elongation, GA3 dipping for bunch loosening"
+      },
+      {
+        "stage": "Berry Sizing & Thinning",
+        "days": "40-80",
+        "description": "Manual berry thinning to 80-100 berries/bunch, fertigation"
+      },
+      {
+        "stage": "Veraison & Ripening",
+        "days": "80-135",
+        "description": "Berry softening, sugar accumulation (>18° Brix), harvest"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 750,
+    "critical_irrigation_stages": [
+      "Berry division",
+      "Berry development",
+      "Veraison"
+    ],
+    "benchmark": {
+      "N": 23.18,
+      "P": 132.53,
+      "K": 200.11,
+      "temp_c": 23.87,
+      "humidity": 81.87,
+      "ph": 6.25,
+      "rainfall_mm": 69.91
+    },
+    "fertilizer_plan": {
+      "basal": "Post-pruning (Day 15-40): 40% N + 100% P + 20% K via drip",
+      "topdress_1": "Berry growth (Day 45-75): 40% N + 30% K",
+      "topdress_2": "Veraison (Day 75-110): 20% N + 50% K (SOP 0-0-50)",
+      "organic_alternative": "FYM 12 t/acre, Vermicompost, Sheep manure",
+      "micronutrients": "Boron & Zinc foliar sprays pre-bloom + Magnesium sulphate"
+    },
+    "costs_per_acre": {
+      "seed_inr": 20000,
+      "fertilizer_inr": 22000,
+      "pesticide_inr": 18000,
+      "labor_inr": 28000,
+      "irrigation_inr": 6000,
+      "machinery_inr": 11000,
+      "total_inr": 105000
+    },
+    "yield_kg_per_acre": "6000-12000",
+    "base_price_rs_per_kg": 31.0,
+    "price_range_rs_per_kg": [
+      26.0,
+      45.0
+    ],
+    "common_pests": [
+      "Thrips",
+      "Mealybugs",
+      "Flea beetle",
+      "Stem borer"
+    ],
+    "common_diseases": [
+      "Downy mildew (Plasmopara)",
+      "Powdery mildew",
+      "Anthracnose"
+    ],
+    "ipm_practices": "Weather-based downy mildew warning, sticky bands on trunk for mealybugs, Trichoderma sprays, canopy aeration."
+  },
+  {
+    "crop_id": "CRP020",
+    "crop_name": "Mango",
+    "local_name": "மாம்பழம் / Maangai",
+    "scientific_name": "Mangifera indica",
+    "category": "Fruit",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 120,
+    "duration_range_days": "100-140 (fruit set to harvest)",
+    "ideal_sowing_months": [
+      6,
+      7,
+      8
+    ],
+    "ideal_harvest_months": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "growth_stages": [
+      {
+        "stage": "Flower Bud Differentiation",
+        "days": "Oct-Dec",
+        "description": "Terminal shoot rest, withhold irrigation to induce blooms"
+      },
+      {
+        "stage": "Panicle Emergence & Flowering",
+        "days": "Jan-Feb",
+        "description": "Hermaphrodite flower pollination, mango hopper scouting"
+      },
+      {
+        "stage": "Fruit Set & Pea Stage",
+        "days": "Mar",
+        "description": "Pea to marble size fruit set, potassium nitrate spray"
+      },
+      {
+        "stage": "Fruit Enlargement & Harvest",
+        "days": "Apr-Jun",
+        "description": "Shoulder development, tapka stage harvesting"
+      }
+    ],
+    "water_requirement_level": "Low-Medium",
+    "total_water_requirement_mm": 700,
+    "critical_irrigation_stages": [
+      "Fruit set",
+      "Fruit development"
+    ],
+    "benchmark": {
+      "N": 20.07,
+      "P": 27.18,
+      "K": 29.92,
+      "temp_c": 31.9,
+      "humidity": 50.05,
+      "ph": 5.77,
+      "rainfall_mm": 94.99
+    },
+    "fertilizer_plan": {
+      "basal": "Post-harvest (Jul-Aug): 50% N + 100% P + 50% K + 50 kg FYM/tree",
+      "topdress_1": "Fruit set (Feb-Mar): 25% N + 25% K",
+      "topdress_2": "Fruit sizing (Apr): 25% N + 25% K",
+      "organic_alternative": "FYM 50 kg/tree/year, Vermicompost",
+      "micronutrients": "Borax 0.5% + Zinc sulphate 0.2% spray to prevent black tip"
+    },
+    "costs_per_acre": {
+      "seed_inr": 8000,
+      "fertilizer_inr": 9000,
+      "pesticide_inr": 6000,
+      "labor_inr": 16000,
+      "irrigation_inr": 3500,
+      "machinery_inr": 4500,
+      "total_inr": 47000
+    },
+    "yield_kg_per_acre": "3500-7500",
+    "base_price_rs_per_kg": 24.0,
+    "price_range_rs_per_kg": [
+      18.0,
+      36.0
+    ],
+    "common_pests": [
+      "Mango hopper",
+      "Fruit fly (Bactrocera)",
+      "Stem borer",
+      "Nut weevil"
+    ],
+    "common_diseases": [
+      "Powdery mildew",
+      "Anthracnose",
+      "Bacterial canker"
+    ],
+    "ipm_practices": "Methyl eugenol fruit fly traps (6/acre), tree trunk grease banding, post-harvest orchard sanitation."
+  },
+  {
+    "crop_id": "CRP021",
+    "crop_name": "Orange",
+    "local_name": "ஆரஞ்சு / Citrus",
+    "scientific_name": "Citrus sinensis",
+    "category": "Fruit",
+    "season_type": "Perennial",
+    "crop_type": "perennial",
+    "total_duration_days": 240,
+    "duration_range_days": "210-270",
+    "ideal_sowing_months": [
+      6,
+      7,
+      8
+    ],
+    "ideal_harvest_months": [
+      11,
+      12,
+      1,
+      2
+    ],
+    "growth_stages": [
+      {
+        "stage": "Flushing & Bahar Bloom",
+        "days": "0-45",
+        "description": "New leaf flush, white fragrant blooms, psylla vector control"
+      },
+      {
+        "stage": "Fruit Set & Marble Sizing",
+        "days": "45-90",
+        "description": "Early fruit set, drop prevention sprays"
+      },
+      {
+        "stage": "Fruit Expansion & Acid Drop",
+        "days": "90-180",
+        "description": "Rapid rind and juice sac enlargement, drip fertigation"
+      },
+      {
+        "stage": "Color Break & Ripening",
+        "days": "180-240",
+        "description": "Chlorophyll breakdown, carotenoid development, selective clipping"
+      }
+    ],
+    "water_requirement_level": "Medium",
+    "total_water_requirement_mm": 900,
+    "critical_irrigation_stages": [
+      "Fruit set",
+      "Rapid fruit development"
+    ],
+    "benchmark": {
+      "N": 19.58,
+      "P": 16.55,
+      "K": 10.01,
+      "temp_c": 22.77,
+      "humidity": 92.5,
+      "ph": 7.01,
+      "rainfall_mm": 110.41
+    },
+    "fertilizer_plan": {
+      "basal": "Bahar start (Feb/Jun): 50% N + 100% P + 50% K + 40 kg FYM/tree",
+      "topdress_1": "Fruit expansion (May/Aug): 25% N + 25% K",
+      "topdress_2": "Pre-harvest (Jul/Oct): 25% N + 25% K",
+      "organic_alternative": "FYM 40 kg/tree/year, Vermicompost 5 kg/tree",
+      "micronutrients": "Zinc sulphate 0.3% + Manganese sulphate 0.2% foliar spray"
+    },
+    "costs_per_acre": {
+      "seed_inr": 10000,
+      "fertilizer_inr": 11000,
+      "pesticide_inr": 7000,
+      "labor_inr": 17000,
+      "irrigation_inr": 4500,
+      "machinery_inr": 5000,
+      "total_inr": 54500
+    },
+    "yield_kg_per_acre": "4000-8000",
+    "base_price_rs_per_kg": 24.0,
+    "price_range_rs_per_kg": [
+      18.0,
+      32.0
+    ],
+    "common_pests": [
+      "Citrus psylla",
+      "Leaf miner",
+      "Fruit sucking moth",
+      "Thrips"
+    ],
+    "common_diseases": [
+      "Citrus canker",
+      "Phytophthora gummosis",
+      "Citrus greening (HLB)"
+    ],
+    "ipm_practices": "Yellow sticky cards for psylla, Bordeaux paste trunk painting, copper oxychloride sprays for canker."
+  },
+  {
+    "crop_id": "CRP022",
+    "crop_name": "Papaya",
+    "local_name": "பப்பாளி / Pappali",
+    "scientific_name": "Carica papaya",
+    "category": "Fruit",
+    "season_type": "Perennial/Year-round",
+    "crop_type": "perennial",
+    "total_duration_days": 270,
+    "duration_range_days": "240-300",
+    "ideal_sowing_months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "ideal_harvest_months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "growth_stages": [
+      {
+        "stage": "Seedling Nursery & Transplanting",
+        "days": "0-45",
+        "description": "Polythene bag nursery, transplanting on raised mounds"
+      },
+      {
+        "stage": "Vegetative & Stem Thickening",
+        "days": "45-100",
+        "description": "Rapid stem diameter growth, fertigation schedule"
+      },
+      {
+        "stage": "Flowering & Sex Expression",
+        "days": "100-130",
+        "description": "Identification of female/hermaphrodite flowers, rogueing males"
+      },
+      {
+        "stage": "Continuous Fruit Bearing & Harvest",
+        "days": "130-270+",
+        "description": "Continuous weekly harvests as fruit tips turn yellow"
+      }
+    ],
+    "water_requirement_level": "Medium-High",
+    "total_water_requirement_mm": 1100,
+    "critical_irrigation_stages": [
+      "Flowering",
+      "Continuous fruiting"
+    ],
+    "benchmark": {
+      "N": 49.88,
+      "P": 59.05,
+      "K": 50.04,
+      "temp_c": 33.72,
+      "humidity": 92.4,
+      "ph": 6.74,
+      "rainfall_mm": 142.63
+    },
+    "fertilizer_plan": {
+      "basal": "FYM 10 kg/plant + 100% P at planting",
+      "topdress_1": "Months 2-4: 40% N + 30% K in monthly splits",
+      "topdress_2": "Bearing stage (Months 5-10): 60% N + 70% K in monthly fertigation splits",
+      "organic_alternative": "FYM 10 t/acre, Vermicompost, Neem cake",
+      "micronutrients": "Boron 0.1% spray to prevent fruit bumpiness + Zinc sulphate"
+    },
+    "costs_per_acre": {
+      "seed_inr": 4500,
+      "fertilizer_inr": 8500,
+      "pesticide_inr": 4500,
+      "labor_inr": 20000,
+      "irrigation_inr": 4500,
+      "machinery_inr": 5500,
+      "total_inr": 47500
+    },
+    "yield_kg_per_acre": "18000-35000",
+    "base_price_rs_per_kg": 15.0,
+    "price_range_rs_per_kg": [
+      11.0,
+      22.0
+    ],
+    "common_pests": [
+      "Papaya mealybug",
+      "Whitefly",
+      "Red spider mites",
+      "Aphids"
+    ],
+    "common_diseases": [
+      "Papaya ring spot virus (PRSV)",
+      "Anthracnose",
+      "Damping off",
+      "Stem rot"
+    ],
+    "ipm_practices": "Pseudococcus/Acerophagus papayae parasitoids for mealybug, raised bed planting, rogueing virus-infected plants."
+  }
+]

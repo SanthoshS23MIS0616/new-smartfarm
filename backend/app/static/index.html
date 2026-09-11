@@ -223,14 +223,93 @@
                   <th>Crop</th><th>Sowing</th><th>Harvest</th><th>Duration</th>
                   <th>Yield (t/ha)</th><th>Price (₹/kg)</th><th>Cost (₹/ha)</th>
                   <th>Revenue (₹/ha)</th><th>Profit (₹/ha)</th><th>Risk</th>
-                  <th>Sustainability</th><th>Score</th>
+                  <th>Sustainability</th><th>Score</th><th>Action</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
+
+          <!-- ── Committed Sowing Plan & Task Calendar ─────────────── -->
+          <section id="committed-plan-section" class="committed-plan-panel hidden">
+            <div class="panel-header" style="padding:16px 20px;flex-wrap:wrap;gap:10px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px 12px 0 0">
+              <div>
+                <h2 id="plan-crop-title" style="color:#14532d;margin:0">Committed Sowing Plan &amp; Tasks</h2>
+                <p id="plan-subtitle" style="margin:4px 0 0 0;font-size:0.88rem;color:#166534">Dated management timeline with confirmation-gated escalation.</p>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button id="recheck-plan-btn" type="button" class="ghost-btn" style="background:#fff;font-weight:600;color:#15803d;border:1px solid #86efac">⚡ Check Weather &amp; Recalibrate</button>
+              </div>
+            </div>
+
+            <!-- Plan Stats Bar -->
+            <div class="plan-stats-bar" id="plan-stats-bar">
+              <div class="plan-stat-item">
+                <span>Sowing Date</span>
+                <strong id="plan-sowing-date">--</strong>
+              </div>
+              <div class="plan-stat-item">
+                <span>Expected Harvest</span>
+                <strong id="plan-harvest-date">--</strong>
+              </div>
+              <div class="plan-stat-item">
+                <span>Budget Status</span>
+                <strong id="plan-budget-status" class="status-badge">--</strong>
+              </div>
+              <div class="plan-stat-item">
+                <span>Schedule Adherence</span>
+                <strong id="plan-progress">0% Completed</strong>
+              </div>
+              <div class="plan-stat-item">
+                <span>Profit at Risk</span>
+                <strong id="plan-risk-amt" style="color:#dc2626">₹0</strong>
+              </div>
+            </div>
+
+            <!-- Alert Notification Ladder Banner -->
+            <div id="plan-alert-banner" class="plan-alert-banner hidden"></div>
+
+            <!-- Task Checklist Grid -->
+            <div class="task-checklist" id="task-checklist"></div>
+          </section>
+
         </section>
       </section>
+
+      <!-- ── Voice & Text RAG Assistant ("Ask SmartFarm") ───────────── -->
+      <aside class="assistant-dock" id="assistant-dock">
+        <div class="assistant-header">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:1.3rem">🎙️</span>
+            <div>
+              <strong style="display:block;font-size:0.95rem;color:#14532d">Ask SmartFarm</strong>
+              <small style="color:#166534">ICAR/TNAU Grounded Advisory</small>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="assistant-lang" class="ghost-select" style="font-size:0.75rem;padding:3px 6px">
+              <option value="en">🇬🇧 English</option>
+              <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+            </select>
+            <button id="toggle-assistant-btn" class="ghost-btn" style="padding:2px 8px;font-size:0.9rem">_</button>
+          </div>
+        </div>
+        <div class="assistant-body" id="assistant-body">
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg system-msg">
+              வணக்கம்! Ask any question about crop management, fertilizer doses, water scheduling, or pest controls in English or Tamil.
+            </div>
+          </div>
+          <div class="assistant-input-row">
+            <button id="mic-btn" type="button" class="mic-btn" title="Speak question">🎤</button>
+            <input type="text" id="assistant-input" placeholder="Ask question... (e.g. When to apply urea?)" />
+            <button id="send-assistant-btn" type="button" class="send-btn">➤</button>
+          </div>
+          <div class="assistant-footer-note">
+            Grounding: ICAR / TNAU Package of Practices · Always verify chemical doses with local KVK.
+          </div>
+        </div>
+      </aside>
 
       <footer class="project-footer">
         <p class="footer-signature">Santhosh S | 23MIS0616 | Artificial Intelligence Project</p>
@@ -243,6 +322,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
-    <script src="/static/app.js?v=20260719-3"></script>
+    <script src="/static/app.js?v=20260911-1"></script>
   </body>
 </html>

@@ -853,7 +853,7 @@ function renderResults(result) {
   const offNote  = best.off_season
     ? `<span class="advisory-tag timing-off">🕐 Off-season sowing — 20% yield penalty</span>` : "";
 
-  bestCropEl.innerHTML = `
+    bestCropEl.innerHTML = `
     <h3>🌾 Best Crop: ${best.crop}</h3>
     <p>Sow in <strong>${best.sowing_month}</strong> → harvest <strong>${best.harvest_month}</strong>
        (${best.duration_months} months).<br/>
@@ -862,6 +862,11 @@ function renderResults(result) {
        Profit: <strong>₹${profitK}K/ha</strong>.
     </p>
     <p style="display:flex;gap:8px;font-size:0.83em;flex-wrap:wrap;margin-top:4px">${monoNote}${irrNote}${offNote}</p>
+    <div style="margin-top:10px">
+      <button type="button" class="btn-commit-crop" onclick="commitCropPlan('${best.crop}')" style="padding:9px 18px;font-size:0.88rem;display:inline-flex;align-items:center;gap:6px">
+        📅 Commit &amp; Generate Sowing Schedule
+      </button>
+    </div>
   `;
 
   // ── Ideal ground card ───────────────────────────────────────────────────
@@ -902,6 +907,11 @@ function renderResults(result) {
       <td>${(item.risk * 100).toFixed(1)}%</td>
       <td>${(item.sustainability_score * 100).toFixed(0)}%</td>
       <td>${item.final_score.toFixed(3)}</td>
+      <td>
+        <button type="button" class="btn-commit-crop" onclick="commitCropPlan('${item.crop}')" title="Generate task calendar">
+          Plan
+        </button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -1014,4 +1024,376 @@ loadMetadata().catch(err => {
   setStatus(err.message);
   // Still render sliders with built-in defaults
   renderSliders();
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── Sowing-to-Harvest Plan & Task Checklist ──────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+let currentCommittedPlan = null;
+
+async function commitCropPlan(cropName) {
+  try {
+    setStatus(`Generating ICAR/TNAU sowing plan for ${cropName}...`);
+    const areaAcres = (areaHectares || 1.0) * 2.471;
+    const today = new Date().toISOString().slice(0, 10);
+
+    const payload = {
+      crop_name: cropName,
+      area_acres: Number(areaAcres.toFixed(2)),
+      sowing_date: today,
+      farmer_budget_inr: Math.round(50000.0 * areaAcres),
+      irrigation_source: "Borewell"
+    };
+
+    const resp = await fetch("/api/plan/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.detail || "Failed to generate sowing plan");
+    }
+
+    const plan = await resp.json();
+    currentCommittedPlan = plan;
+    renderCommittedPlan(plan);
+
+    const planSec = document.getElementById("committed-plan-section");
+    if (planSec) {
+      planSec.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    setStatus(`✔ Sowing plan generated for ${cropName} (${plan.tasks?.length || 0} tasks scheduled)`);
+  } catch (err) {
+    setStatus("Plan error: " + err.message);
+  }
+}
+
+function renderCommittedPlan(plan) {
+  if (!plan) return;
+  const section = document.getElementById("committed-plan-section");
+  if (!section) return;
+  section.classList.remove("hidden");
+
+  // Header & stats
+  const areaAcres = plan.area_acres || ((areaHectares || 1.0) * 2.471);
+  const totalCost = plan.budget_analysis?.cost_breakdown?.total_recommended_budget_inr || 0;
+  document.getElementById("plan-crop-title").textContent = `📅 Sowing-to-Harvest Plan: ${plan.crop_name} (${areaAcres.toFixed(1)} acres)`;
+  document.getElementById("plan-subtitle").textContent = 
+    `Plot: ${(areaAcres / 2.471).toFixed(2)} ha (${areaAcres.toFixed(1)} acres) · Duration: ${plan.duration_days} Days · Est. Budget: ₹${Math.round(totalCost).toLocaleString("en-IN")}`;
+
+  document.getElementById("plan-sowing-date").textContent = plan.sowing_date;
+  document.getElementById("plan-harvest-date").textContent = plan.expected_harvest_date;
+
+  const budgetEl = document.getElementById("plan-budget-status");
+  const ba = plan.budget_analysis;
+  if (ba) {
+    const isAffordable = ba.is_affordable;
+    budgetEl.textContent = isAffordable ? `✓ ${ba.status.toUpperCase()}` : "⚠ INSUFFICIENT";
+    budgetEl.className = `status-badge ${isAffordable ? "badge-success" : "badge-danger"}`;
+    budgetEl.title = ba.guidance || "";
+  }
+
+  // Progress
+  const totalTasks = plan.total_tasks_count || (plan.tasks ? plan.tasks.length : 0);
+  const completedTasks = plan.completed_tasks_count !== undefined 
+    ? plan.completed_tasks_count 
+    : (plan.tasks ? plan.tasks.filter(t => t.is_completed).length : 0);
+  const adherence = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  document.getElementById("plan-progress").textContent = `${adherence}% Completed (${completedTasks}/${totalTasks})`;
+
+  // Risk
+  const riskVal = plan.total_profit_at_risk_inr || plan.profit_at_risk_rs || 0;
+  const riskEl = document.getElementById("plan-risk-amt");
+  riskEl.textContent = `₹${Math.round(riskVal).toLocaleString("en-IN")}`;
+  riskEl.style.color = riskVal > 0 ? "#dc2626" : "#16a34a";
+
+  // Render task list
+  const container = document.getElementById("task-checklist");
+  container.innerHTML = "";
+
+  (plan.tasks || []).forEach((task) => {
+    const isDone = !!task.is_completed;
+    const isSuppressed = task.escalation_label === "Recalibrated" || task.recalibration_note;
+    const isPostponed = task.escalation_label === "Postponed";
+    const card = document.createElement("div");
+    card.className = `task-card ${isDone ? "completed" : ""} ${isSuppressed ? "suppressed" : ""}`;
+    card.id = `task-card-${task.task_id}`;
+
+    let statusBadge = "";
+    if (isDone) {
+      statusBadge = `<span class="timing-badge timing-ok">✓ Done</span>`;
+    } else if (isSuppressed) {
+      statusBadge = `<span class="timing-badge" style="background:#e0f2fe;color:#0369a1">💧 Recalibrated (Rain Suppressed)</span>`;
+    } else if (isPostponed) {
+      statusBadge = `<span class="timing-badge" style="background:#fef3c7;color:#92400e">⏳ Postponed</span>`;
+    } else if (task.escalation_tier > 0) {
+      statusBadge = `<span class="timing-badge timing-off">⚠️ Tier ${task.escalation_tier} (${task.escalation_channel || "Alert"})</span>`;
+    }
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <input type="checkbox" id="chk-${task.task_id}" class="task-checkbox" 
+               ${isDone ? "checked" : ""} 
+               onchange="toggleTaskConfirm('${plan.plan_id}', '${task.task_id}', this.checked)" />
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+            <span class="task-stage-badge">${(task.task_type || "TASK").toUpperCase()} (Day ${task.day_offset})</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              ${statusBadge}
+              <span class="task-date">${task.due_date}</span>
+            </div>
+          </div>
+          <h4 style="margin:6px 0 3px 0;color:#1e293b;font-size:0.96rem">${task.title}</h4>
+          <p style="margin:0;font-size:0.85rem;color:#475569;line-height:1.4">${task.description}</p>
+          ${task.recalibration_note ? `<p style="margin:4px 0 0 0;font-size:0.82rem;color:#0284c7"><strong>Recalibration:</strong> ${task.recalibration_note}</p>` : ""}
+          <div style="margin-top:8px;font-size:0.8rem;color:#64748b;display:flex;justify-content:space-between;align-items:center">
+            <span>Est. Cost: <strong>₹${Math.round(task.estimated_cost_inr || 0).toLocaleString("en-IN")}</strong></span>
+            ${task.alert_message ? `<span style="color:#b91c1c;font-weight:500">${task.alert_message}</span>` : ""}
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function toggleTaskConfirm(planId, taskId, isConfirmed) {
+  try {
+    const resp = await fetch("/api/plan/task/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plan_id: planId,
+        task_id: taskId,
+        is_completed: isConfirmed
+      })
+    });
+
+    if (!resp.ok) {
+      throw new Error("Failed to update task confirmation state");
+    }
+
+    const data = await resp.json();
+    if (currentCommittedPlan && currentCommittedPlan.tasks) {
+      for (const t of currentCommittedPlan.tasks) {
+        if (t.task_id === taskId) {
+          t.is_completed = isConfirmed;
+          break;
+        }
+      }
+      currentCommittedPlan.completed_tasks_count = data.completed_tasks_count;
+      renderCommittedPlan(currentCommittedPlan);
+    }
+    setStatus(`Task updated: ${isConfirmed ? "Confirmed completed" : "Marked incomplete"}`);
+  } catch (err) {
+    setStatus("Task update error: " + err.message);
+  }
+}
+
+// ── Environmental Recalibration & Graded Escalation ─────────────────────────
+document.getElementById("recheck-plan-btn")?.addEventListener("click", async () => {
+  if (!currentCommittedPlan) {
+    setStatus("Please commit to a crop plan first.");
+    return;
+  }
+  try {
+    setStatus("Checking live weather & evaluating task schedule...");
+    const banner = document.getElementById("plan-alert-banner");
+
+    const payload = {
+      plan_id: currentCommittedPlan.plan_id,
+      plan: currentCommittedPlan,
+      weather: {
+        rainfall_mm: 38.5,
+        wind_kmh: 12.0
+      }
+    };
+
+    const resp = await fetch("/api/plan/recheck", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      throw new Error("Recalibration failed");
+    }
+
+    const result = await resp.json();
+    currentCommittedPlan.tasks = result.tasks;
+    currentCommittedPlan.total_profit_at_risk_inr = result.total_profit_at_risk_inr;
+    currentCommittedPlan.completed_tasks_count = result.completed_tasks;
+    renderCommittedPlan(currentCommittedPlan);
+
+    // Render alert ladder
+    if (result.active_alerts && result.active_alerts.length > 0) {
+      banner.classList.remove("hidden");
+      banner.innerHTML = `
+        <div style="font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+          <span>⚡ Environmental Recalibration & Graded Escalation Triggered (${result.highest_escalation_label}):</span>
+        </div>
+        <ul style="margin:0;padding-left:18px;font-size:0.86rem;line-height:1.5">
+          ${result.active_alerts.map(a => `
+            <li>
+              <strong>[${(a.channel || "Alert").toUpperCase()}] Tier ${a.tier} - ${a.title}</strong>: 
+              ${a.message} 
+              ${a.tamil_message ? `<br/><em style="color:#166534">தமிழ்: ${a.tamil_message}</em>` : ""}
+            </li>
+          `).join("")}
+        </ul>
+      `;
+    } else {
+      banner.classList.remove("hidden");
+      banner.innerHTML = `<span style="color:#166534">✓ Weather check normal. All scheduled operations are on track with zero conflict.</span>`;
+    }
+    setStatus("✔ Plan recalibrated against environmental conditions");
+  } catch (err) {
+    setStatus("Recalibration error: " + err.message);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── Voice & Text Grounded RAG Assistant ("Ask SmartFarm") ───────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+const assistantDock = document.getElementById("assistant-dock");
+const toggleAssistantBtn = document.getElementById("toggle-assistant-btn");
+const assistantInput = document.getElementById("assistant-input");
+const sendAssistantBtn = document.getElementById("send-assistant-btn");
+const micBtn = document.getElementById("mic-btn");
+const langSelect = document.getElementById("assistant-lang");
+const chatMessages = document.getElementById("chat-messages");
+
+if (toggleAssistantBtn) {
+  toggleAssistantBtn.addEventListener("click", () => {
+    assistantDock.classList.toggle("collapsed");
+    toggleAssistantBtn.textContent = assistantDock.classList.contains("collapsed") ? "□" : "_";
+  });
+}
+
+function appendChatMessage(sender, text, citations = null, warning = null) {
+  const msgEl = document.createElement("div");
+  msgEl.className = `chat-msg ${sender}-msg`;
+
+  let inner = `<div>${text.replace(/\n/g, "<br/>")}</div>`;
+  if (citations && citations.length > 0) {
+    inner += `<div class="msg-citations"><small>📚 <strong>Sources:</strong> ${citations.join(" · ")}</small></div>`;
+  }
+  if (warning) {
+    inner += `<div class="msg-warning"><small>⚠️ ${warning}</small></div>`;
+  }
+  msgEl.innerHTML = inner;
+  chatMessages.appendChild(msgEl);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function askAssistant(queryText) {
+  if (!queryText || !queryText.trim()) return;
+  const q = queryText.trim();
+  const lang = langSelect?.value || "en";
+  const cropCtx = currentCommittedPlan?.crop_name || "";
+
+  appendChatMessage("user", q);
+  if (assistantInput) assistantInput.value = "";
+
+  try {
+    const loadingId = "loading-" + Date.now();
+    const loadingEl = document.createElement("div");
+    loadingEl.id = loadingId;
+    loadingEl.className = "chat-msg system-msg";
+    loadingEl.textContent = lang === "ta" ? "சிந்திக்கிறது... (Consulting ICAR/TNAU POP)..." : "Consulting ICAR/TNAU Package of Practices...";
+    chatMessages.appendChild(loadingEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    const resp = await fetch("/api/assistant/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: q,
+        crop_name: cropCtx,
+        language: lang
+      })
+    });
+
+    document.getElementById(loadingId)?.remove();
+
+    if (!resp.ok) {
+      throw new Error("Assistant request failed");
+    }
+
+    const data = await resp.json();
+    const citations = (data.sources || []).map(s => `${s.title} (${s.source})`);
+    appendChatMessage("assistant", data.answer, citations, data.disclaimer);
+
+    // Speak response if Web Speech API available
+    if ("speechSynthesis" in window && data.answer) {
+      try {
+        window.speechSynthesis.cancel();
+        const cleanText = data.answer.replace(/[*#_`]/g, "").slice(0, 250);
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = lang === "ta" ? "ta-IN" : "en-IN";
+        utter.rate = 0.95;
+        window.speechSynthesis.speak(utter);
+      } catch (speechErr) {
+        console.warn("TTS error:", speechErr);
+      }
+    }
+  } catch (err) {
+    appendChatMessage("system", "Error answering query: " + err.message);
+  }
+}
+
+sendAssistantBtn?.addEventListener("click", () => {
+  askAssistant(assistantInput?.value);
+});
+
+assistantInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    askAssistant(assistantInput.value);
+  }
+});
+
+// Voice Input (Web Speech Recognition)
+let recognition = null;
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRec();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    micBtn?.classList.add("listening");
+    setStatus("🎙️ Listening... speak now");
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    if (assistantInput) assistantInput.value = transcript;
+    askAssistant(transcript);
+  };
+
+  recognition.onerror = (event) => {
+    micBtn?.classList.remove("listening");
+    setStatus("Mic error: " + event.error);
+  };
+
+  recognition.onend = () => {
+    micBtn?.classList.remove("listening");
+  };
+}
+
+micBtn?.addEventListener("click", () => {
+  if (!recognition) {
+    alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+    return;
+  }
+  const lang = langSelect?.value || "en";
+  recognition.lang = lang === "ta" ? "ta-IN" : "en-IN";
+  try {
+    recognition.start();
+  } catch (e) {
+    recognition.stop();
+  }
 });

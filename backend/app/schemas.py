@@ -43,3 +43,30 @@ class PredictionInput(BaseModel):
 
 class TrainRequest(BaseModel):
     data_dir: Optional[str] = None
+
+
+class PlanGenerateRequest(BaseModel):
+    crop_name: str
+    sowing_date: Optional[str] = None
+    area_acres: float = Field(default=1.0, gt=0)
+    farmer_budget_inr: float = Field(default=50000.0, ge=0)
+    irrigation_source: str = "Borewell"
+
+
+class TaskConfirmRequest(BaseModel):
+    plan_id: str
+    task_id: str
+    is_completed: bool = True
+
+
+class PlanRecheckRequest(BaseModel):
+    plan_id: Optional[str] = None
+    plan: Optional[dict] = None
+    weather: Optional[dict] = None
+
+
+class AssistantAskRequest(BaseModel):
+    query: str
+    crop_name: Optional[str] = None
+    farmer_context: Optional[dict] = None
+    language: Optional[str] = None
