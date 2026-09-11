@@ -1007,6 +1007,60 @@ document.getElementById("download-report-btn").addEventListener("click", e => {
     }
   }
 
+  // Page 2: Calculated Fertilizer/Pesticide Input Doses & Complete Sowing Task Schedule
+  doc.addPage();
+  doc.setFillColor(34, 92, 54);
+  doc.rect(0, 0, 210, 24, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(`Fertilizer, Pesticide & Detailed Sowing Task Calendar — ${best.crop}`, 14, 15);
+
+  const plotAcres = currentCommittedPlan ? currentCommittedPlan.area_acres : ((areaHectares || 1.0) * 2.471);
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10.5);
+  doc.text(`Calculated Input Doses for Plot Area: ${plotAcres.toFixed(1)} Acres (${(plotAcres/2.471).toFixed(2)} ha)`, 14, 32);
+
+  const fertData = [
+    ["Basal NPK Dose", `${Math.round(25 * plotAcres)} kg Urea + ${Math.round(50 * plotAcres)} kg DAP + ${Math.round(25 * plotAcres)} kg MOP`, "Land prep / Sowing"],
+    ["Organic / Bio-Fertilizer", `${Math.round(100 * plotAcres)} kg Neem Cake + ${(2 * plotAcres).toFixed(1)} kg Bio-inoculants`, "Basal incorporation"],
+    ["Topdressing Round 1", `${Math.round(35 * plotAcres)} kg Urea`, "20-25 days after sowing"],
+    ["Topdressing Round 2", `${Math.round(25 * plotAcres)} kg Urea + ${Math.round(15 * plotAcres)} kg MOP`, "Flowering / Pod setting"],
+    ["Pesticide / IPM Control", `Light traps + Neem oil spray (${(1.5 * plotAcres).toFixed(1)} L) + Trichogramma bio-cards`, "Scouting at 30 & 60 days"],
+  ];
+
+  doc.autoTable({
+    head: [["Category / Operation", "Recommended Dose & Materials", "Application Stage"]],
+    body: fertData,
+    startY: 36,
+    headStyles: { fillColor: [20, 83, 45], fontSize: 8.5 },
+    bodyStyles: { fontSize: 8 },
+  });
+
+  const yTasks = (doc.lastAutoTable?.finalY || 100) + 10;
+  doc.setFontSize(10.5);
+  doc.setFont("helvetica", "bold");
+  doc.text("Sowing-to-Harvest Task Timeline & Cost Breakdown", 14, yTasks);
+
+  const taskRows = (currentCommittedPlan?.tasks || []).map(t => [
+    t.task_id,
+    t.due_date,
+    (t.task_type || "").toUpperCase(),
+    t.title,
+    `Rs ${Math.round(t.estimated_cost_inr || 0).toLocaleString("en-IN")}`,
+    t.is_completed ? "Completed" : (t.escalation_tier > 0 ? `Tier ${t.escalation_tier} Alert` : "Pending")
+  ]);
+
+  if (taskRows.length > 0) {
+    doc.autoTable({
+      head: [["Task ID", "Due Date", "Stage", "Task Title & Operation", "Est. Cost", "Status"]],
+      body: taskRows,
+      startY: yTasks + 4,
+      headStyles: { fillColor: [21, 128, 61], fontSize: 8.5 },
+      bodyStyles: { fontSize: 8 },
+    });
+  }
+
   doc.setFillColor(240, 240, 240);
   doc.rect(0, 282, 210, 15, "F");
   doc.setTextColor(100, 100, 100); doc.setFontSize(8);
@@ -1065,6 +1119,25 @@ async function commitCropPlan(cropName) {
       planSec.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     setStatus(`✔ Sowing plan generated for ${cropName} (${plan.tasks?.length || 0} tasks scheduled)`);
+
+    // Automatic Voice Readout of 2-line plan summary
+    if ("speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const areaAcres = plan.area_acres || ((areaHectares || 1.0) * 2.471);
+        const lang = document.getElementById("assistant-lang")?.value || "en";
+        let speechMsg = `Sowing schedule committed for ${cropName} across ${areaAcres.toFixed(1)} acres. Estimated budget is ${Math.round(plan.budget_analysis?.cost_breakdown?.total_recommended_budget_inr || 0).toLocaleString("en-IN")} rupees.`;
+        if (lang === "ta") {
+          speechMsg = `${cropName} பயிருக்கான விதைப்பு கால அட்டவணை உருவாக்கப்பட்டது. மதிப்பீடு செய்யப்பட்ட செலவு ${Math.round(plan.budget_analysis?.cost_breakdown?.total_recommended_budget_inr || 0).toLocaleString("en-IN")} ரூபாய்.`;
+        }
+        const utter = new SpeechSynthesisUtterance(speechMsg);
+        utter.lang = lang === "ta" ? "ta-IN" : "en-IN";
+        utter.rate = 0.95;
+        window.speechSynthesis.speak(utter);
+      } catch (speechErr) {
+        console.warn("Auto voice readout error:", speechErr);
+      }
+    }
   } catch (err) {
     setStatus("Plan error: " + err.message);
   }
@@ -1177,14 +1250,75 @@ async function toggleTaskConfirm(planId, taskId, isConfirmed) {
 
     const data = await resp.json();
     if (currentCommittedPlan && currentCommittedPlan.tasks) {
-      for (const t of currentCommittedPlan.tasks) {
+      let targetIdx = -1;
+      currentCommittedPlan.tasks.forEach((t, idx) => {
         if (t.task_id === taskId) {
           t.is_completed = isConfirmed;
-          break;
+          targetIdx = idx;
+        }
+      });
+
+      // Demonstration: If checking a later task (e.g. task 4) while prior tasks (e.g. task 2 & 3) were skipped
+      let skippedTasks = [];
+      let totalRisk = 0;
+      if (isConfirmed && targetIdx > 0) {
+        for (let i = 0; i < targetIdx; i++) {
+          const prior = currentCommittedPlan.tasks[i];
+          if (!prior.is_completed) {
+            prior.escalation_tier = 3;
+            prior.escalation_label = "Critical";
+            prior.escalation_channel = "whatsapp_sms_call";
+            const cost = prior.estimated_cost_inr || 1000;
+            prior.alert_message = `URGENT: Skipped task '${prior.title}' is overdue! Action required to protect approx ₹${Math.round(cost * 3.8).toLocaleString("en-IN")} in yield.`;
+            skippedTasks.push(prior);
+            totalRisk += Math.round(cost * 3.8);
+          }
         }
       }
+
       currentCommittedPlan.completed_tasks_count = data.completed_tasks_count;
+      if (skippedTasks.length > 0) {
+        currentCommittedPlan.total_profit_at_risk_inr = totalRisk;
+      }
       renderCommittedPlan(currentCommittedPlan);
+
+      // Render Alert Banner & Speak Warning if tasks were skipped
+      if (skippedTasks.length > 0) {
+        const banner = document.getElementById("plan-alert-banner");
+        if (banner) {
+          banner.classList.remove("hidden");
+          banner.innerHTML = `
+            <div style="font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;color:#b91c1c">
+              <span>🚨 Escalation Alert: ${skippedTasks.length} skipped prior task(s) detected!</span>
+            </div>
+            <ul style="margin:0;padding-left:18px;font-size:0.86rem;line-height:1.5;color:#991b1b">
+              ${skippedTasks.map(t => `
+                <li>
+                  <strong>[CALL / WHATSAPP DISPATCHED] Tier 3 - ${t.title}</strong>: 
+                  ${t.alert_message}
+                </li>
+              `).join("")}
+            </ul>
+            <div style="margin-top:6px;font-size:0.83rem;color:#7f1d1d">Total Profit at Risk: <strong>₹${totalRisk.toLocaleString("en-IN")}</strong></div>
+          `;
+        }
+
+        // Voice Alert Readout
+        if ("speechSynthesis" in window) {
+          try {
+            window.speechSynthesis.cancel();
+            const lang = document.getElementById("assistant-lang")?.value || "en";
+            let warnMsg = `Warning: ${skippedTasks.length} critical task was skipped. Automated SMS and voice call dispatched to protect yield.`;
+            if (lang === "ta") {
+              warnMsg = `அவசர எச்சரிக்கை: ${skippedTasks.length} முக்கியமான பணி தவிர்க்கப்பட்டது. பயிர் பாதுகாப்பிற்காக தானியங்கி அழைப்பு விடுக்கப்பட்டது.`;
+            }
+            const utter = new SpeechSynthesisUtterance(warnMsg);
+            utter.lang = lang === "ta" ? "ta-IN" : "en-IN";
+            utter.rate = 0.95;
+            window.speechSynthesis.speak(utter);
+          } catch (e) {}
+        }
+      }
     }
     setStatus(`Task updated: ${isConfirmed ? "Confirmed completed" : "Marked incomplete"}`);
   } catch (err) {

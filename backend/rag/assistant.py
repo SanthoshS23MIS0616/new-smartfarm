@@ -155,7 +155,9 @@ def answer_farmer_query(
         "You are 'SmartFarm Assistant', an agronomic advisory system for Indian farmers. "
         "Strictly answer the farmer's question using ONLY the provided verified agricultural context below. "
         "Do NOT hallucinate chemical dosages or invent unverified practices. "
-        "Explain clearly, practically, and respectfully. "
+        "CRITICAL FORMAT REQUIREMENT: Always begin your response with a clear 1-sentence direct summary answer on the very first line! "
+        "Then follow with short bullet points for details if needed. "
+        "Do NOT add redundant disclaimers or manual source footnotes at the end, as the system appends citations automatically. "
         + ("Respond in clear Tamil language." if is_ta else "Respond in clear, professional English.")
     )
 
@@ -168,14 +170,14 @@ def answer_farmer_query(
     if not llm_answer:
         primary = passages[0]
         if is_ta:
-            llm_answer = f"**{primary['title']}**\n\n{primary['text']}\n\n*(ஆதாரம்: {primary['source']})*"
+            llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
         else:
-            llm_answer = f"**{primary['title']}**\n\n{primary['text']}\n\n*(Source: {primary['source']})*"
+            llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
 
     disclaimer = SAFETY_DISCLAIMER_TA if is_ta else SAFETY_DISCLAIMER_EN
 
     return {
-        "answer": f"{llm_answer}\n\n{disclaimer}",
+        "answer": llm_answer,
         "language": "ta" if is_ta else "en",
         "sources": [{"title": p["title"], "source": p["source"]} for p in passages],
         "disclaimer": disclaimer,
