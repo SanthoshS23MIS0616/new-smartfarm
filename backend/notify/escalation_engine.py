@@ -224,6 +224,7 @@ def dispatch_escalation_alert(
     account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
     auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
     from_phone = os.environ.get("TWILIO_PHONE_NUMBER")
+    farmer_phone = os.environ.get("FARMER_PHONE_NUMBER", farmer_phone)
 
     tier = alert.get("tier", 1)
     channel = alert.get("channel", "in_app")

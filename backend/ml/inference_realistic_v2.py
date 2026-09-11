@@ -188,6 +188,8 @@ def _to_float32_array(matrix: Any) -> np.ndarray:
 
 
 def _candidate_scores(values: list[float]) -> list[float]:
+    if not values:
+        return []
     low = min(values)
     high = max(values)
     if high <= low:
