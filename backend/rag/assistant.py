@@ -83,33 +83,28 @@ def _call_gemini_llm(system_prompt: str, user_prompt: str) -> str | None:
     if not api_key:
         return None
 
-    try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-        prompt_combined = system_prompt + "\n\n" + user_prompt
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt_combined}
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 600
-            }
-        }
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            return data["candidates"][0]["content"]["parts"][0]["text"]
-    except Exception as exc:
-        logger.debug("Gemini LLM call failed: %s", exc)
-        return None
+    models_to_try = ["gemini-3.6-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+    prompt_combined = system_prompt + "\n\n" + user_prompt
+    payload = {
+        "contents": [{"parts": [{"text": prompt_combined}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 600}
+    }
+
+    for model_name in models_to_try:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception as exc:
+            logger.debug("Gemini model %s failed: %s", model_name, exc)
+            continue
+    return None
 
 
 def answer_farmer_query(
