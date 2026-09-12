@@ -1735,7 +1735,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusMsg = document.getElementById("auth-status-msg");
 
   closeAuthBtn?.addEventListener("click", () => {
-    document.getElementById("auth-modal")?.classList.add("hidden");
+    const modal = document.getElementById("auth-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.display = "none";
+    }
   });
 
   voicePromptBtn?.addEventListener("click", () => {
@@ -1763,10 +1767,16 @@ document.addEventListener("DOMContentLoaded", () => {
   sendOtpBtn?.addEventListener("click", async () => {
     const phone = document.getElementById("farmer-phone-input")?.value?.trim();
     if (!phone || phone.length < 8) {
-      if (statusMsg) statusMsg.textContent = "Please enter a valid phone number with country code (e.g. +919876543210).";
+      if (statusMsg) {
+        statusMsg.style.color = "#dc2626";
+        statusMsg.textContent = "Please enter your mobile phone number with country code (e.g. +91994525549).";
+      }
       return;
     }
-    if (statusMsg) statusMsg.textContent = "Sending verification code...";
+    if (statusMsg) {
+      statusMsg.style.color = "#166534";
+      statusMsg.textContent = "Placing live Twilio voice call / SMS to your mobile phone with OTP code...";
+    }
     try {
       const res = await fetch("/api/auth/otp/send", {
         method: "POST",
@@ -1795,7 +1805,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = document.getElementById("farmer-name-input")?.value?.trim() || "Farmer";
 
     if (!otp) {
-      if (statusMsg) statusMsg.textContent = "Please enter the verification OTP code.";
+      if (statusMsg) {
+        statusMsg.style.color = "#dc2626";
+        statusMsg.textContent = "Please enter the verification OTP code.";
+      }
       return;
     }
 
@@ -1809,6 +1822,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(data.detail || "OTP verification failed");
 
       setStoredFarmer(data.user);
+      const modal = document.getElementById("auth-modal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+      }
       if (_pending_commit_crop) {
         executeCommitCropPlan(_pending_commit_crop, data.user.phone_number, data.user.full_name);
       }
@@ -1822,7 +1840,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   googleAuthBtn?.addEventListener("click", async () => {
     const name = document.getElementById("farmer-name-input")?.value?.trim() || "Google Farmer";
-    const phone = document.getElementById("farmer-phone-input")?.value?.trim() || "+9198765" + Math.floor(10000 + Math.random() * 90000);
+    const phone = document.getElementById("farmer-phone-input")?.value?.trim() || "+91994525549";
 
     try {
       const res = await fetch("/api/auth/google", {
@@ -1834,6 +1852,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(data.detail || "Google Auth failed");
 
       setStoredFarmer(data.user);
+      const modal = document.getElementById("auth-modal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+      }
       if (_pending_commit_crop) {
         executeCommitCropPlan(_pending_commit_crop, data.user.phone_number, data.user.full_name);
       }

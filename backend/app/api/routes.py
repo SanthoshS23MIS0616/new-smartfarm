@@ -90,12 +90,42 @@ def send_otp(request: SendOTPRequest) -> dict:
     if len(phone) < 8:
         raise HTTPException(status_code=400, detail="Invalid phone number format. Please enter a valid mobile number.")
 
-    otp_code = generate_otp_for_phone(phone)
-    # Log simulated SMS / Twilio dispatch
+    target_phone = phone if phone.startswith("+") else f"+91{phone}" if len(phone) == 10 else f"+{phone}"
+    otp_code = generate_otp_for_phone(target_phone)
+    
+    # Real cellular dispatch via Twilio IVR Voice Call / SMS
+    account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+    auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+    from_phone = os.environ.get("TWILIO_PHONE_NUMBER")
+    
+    dispatch_msg = f"OTP sent to {target_phone}."
+    if account_sid and auth_token and from_phone:
+        try:
+            from twilio.rest import Client
+            client = Client(account_sid, auth_token)
+            # Spoken OTP voice call
+            speech_otp = " ".join(list(otp_code))
+            twiml_str = f'<Response><Say language="en-IN">Your SmartFarm verification code is {speech_otp}.</Say></Response>'
+            try:
+                client.calls.create(
+                    url="https://webhooks.twilio.com/v1/Voice/Template/voice_text_to_speech",
+                    to=target_phone,
+                    from_=from_phone
+                )
+            except Exception:
+                client.calls.create(
+                    twiml=twiml_str,
+                    to=target_phone,
+                    from_=from_phone
+                )
+            dispatch_msg = f"Live OTP call dispatched to {target_phone}! Answer your phone to hear the code."
+        except Exception as tw_err:
+            logger.warning("Twilio OTP voice call failed: %s", tw_err)
+
     return {
         "status": "success",
-        "message": f"OTP sent to {phone}. (Demo OTP Code: {otp_code} or use master code 1234)",
-        "phone_number": phone,
+        "message": f"{dispatch_msg} (Demo/Fallback Code: {otp_code} or 1234)",
+        "phone_number": target_phone,
         "otp_demo": otp_code,
     }
 
