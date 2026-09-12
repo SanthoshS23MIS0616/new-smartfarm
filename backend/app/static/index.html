@@ -312,6 +312,63 @@
         </div>
       </aside>
 
+      <!-- ── Farmer Registration & Auth Modal (Phone OTP / Google OAuth) ── -->
+      <div id="auth-modal" class="modal-overlay hidden" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)">
+        <div class="modal-card" style="background:#ffffff;border-radius:16px;max-width:440px;width:90%;padding:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);position:relative">
+          <button id="close-auth-modal" type="button" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#64748b">&times;</button>
+          
+          <div style="text-align:center;margin-bottom:18px">
+            <span style="font-size:2.4rem">🌾</span>
+            <h2 style="font-size:1.3rem;color:#14532d;margin:6px 0 2px 0">Farmer Registration & Sowing Plan Commit</h2>
+            <p style="font-size:0.85rem;color:#475569">Save your sowing schedule lifelong & enable automatic WhatsApp / Voice alerts.</p>
+            <button type="button" id="auth-voice-prompt-btn" style="margin-top:8px;padding:4px 12px;font-size:0.78rem;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+              🔊 <span>Listen Voice Instructions (Tamil/Eng)</span>
+            </button>
+          </div>
+
+          <!-- Tab Selector -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:8px">
+            <button type="button" id="tab-phone-btn" style="flex:1;padding:8px;font-size:0.88rem;font-weight:600;background:#166534;color:#fff;border:none;border-radius:6px;cursor:pointer">📱 Mobile Number (OTP)</button>
+            <button type="button" id="tab-google-btn" style="flex:1;padding:8px;font-size:0.88rem;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer">🌐 Google Auth</button>
+          </div>
+
+          <!-- Section 1: Phone + OTP -->
+          <div id="auth-phone-section">
+            <div id="step-phone-input">
+              <label style="display:block;font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:4px">Farmer Full Name</label>
+              <input type="text" id="farmer-name-input" placeholder="e.g. Santhosh Farmer" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box" />
+
+              <label style="display:block;font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:4px">Mobile Phone Number (with Country Code)</label>
+              <div style="display:flex;gap:8px;margin-bottom:14px">
+                <input type="tel" id="farmer-phone-input" placeholder="+919876543210" style="flex:1;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.9rem;box-sizing:border-box" />
+                <button type="button" id="send-otp-btn" style="padding:10px 14px;background:#166534;color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;white-space:nowrap">Send OTP</button>
+              </div>
+            </div>
+
+            <!-- Step 2: OTP Verification -->
+            <div id="step-otp-verify" class="hidden" style="margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1">
+              <label style="display:block;font-size:0.82rem;font-weight:600;color:#15803d;margin-bottom:4px">Enter 4-Digit Verification Code (OTP)</label>
+              <div style="display:flex;gap:8px;margin-bottom:14px">
+                <input type="text" id="otp-code-input" placeholder="e.g. 1234" maxlength="6" style="flex:1;padding:10px;border:1px solid #166534;border-radius:8px;font-size:1.1rem;letter-spacing:4px;text-align:center;font-weight:700" />
+                <button type="button" id="verify-otp-btn" style="padding:10px 16px;background:#15803d;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;cursor:pointer">Verify & Commit</button>
+              </div>
+              <small id="otp-demo-hint" style="color:#64748b;font-size:0.75rem;display:block">Demo code: Check screen message or use <strong>1234</strong>.</small>
+            </div>
+          </div>
+
+          <!-- Section 2: Google Auth -->
+          <div id="auth-google-section" class="hidden" style="text-align:center;padding:12px 0">
+            <p style="font-size:0.85rem;color:#475569;margin-bottom:14px">Authenticate securely using your Google Account.</p>
+            <button type="button" id="google-auth-btn" style="width:100%;padding:12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:8px;font-size:0.92rem;font-weight:600;color:#1e293b;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+              <span>Sign in & Commit with Google</span>
+            </button>
+          </div>
+
+          <div id="auth-status-msg" style="margin-top:12px;font-size:0.8rem;text-align:center;color:#dc2626"></div>
+        </div>
+      </div>
+
       <footer class="project-footer">
         <p class="footer-signature">Santhosh S | 23MIS0616 | Artificial Intelligence Project</p>
       </footer>

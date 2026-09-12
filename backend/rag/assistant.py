@@ -5,19 +5,26 @@ Voice-First Grounded RAG Assistant ("Ask SmartFarm"):
 - Uses verified ICAR / TNAU POP knowledge corpus
 - Protects against chemical dosage hallucinations
 - Responds in English or Tamil
-- Supports optional Groq (Llama-3.3-70B) or Google Gemini LLM with automatic fallback
+- Primary LLM: OpenAI API (model: gpt-5.6-luna) with rate-limiting & quota protection
+- Fallbacks: Groq (Llama-3.3-70B), Google Gemini, or direct verified passage
 """
 from __future__ import annotations
 
 import json
 import logging
 import os
+import time
 import urllib.request
 import urllib.error
 from typing import Any
 from backend.rag.knowledge_corpus import retrieve_relevant_passages
 
 logger = logging.getLogger(__name__)
+
+# Global rate limiting & LRU response cache for Free Tier Quota Protection
+_last_openai_call_time: float = 0.0
+_llm_response_cache: dict[str, str] = {}
+
 
 def _load_dotenv() -> None:
     env_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
@@ -55,6 +62,50 @@ def _is_tamil(text: str) -> bool:
     return False
 
 
+def _call_openai_llm(system_prompt: str, user_prompt: str) -> str | None:
+    """Primary OpenAI LLM engine using gpt-5.6-luna with strict rate limiting & quota protection."""
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return None
+
+    global _last_openai_call_time, _llm_response_cache
+
+    # 1. Rate Limiting Guardrail (1.2s delay between calls for free-tier quota protection)
+    now = time.time()
+    time_since_last = now - _last_openai_call_time
+    if time_since_last < 1.2:
+        time.sleep(1.2 - time_since_last)
+    _last_openai_call_time = time.time()
+
+    # 2. In-memory caching for identical queries
+    cache_key = f"{user_prompt.strip().lower()}:{system_prompt[-30:]}"
+    if cache_key in _llm_response_cache:
+        return _llm_response_cache[cache_key]
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-5.6-luna",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.2,
+            max_tokens=500,
+        )
+        content = response.choices[0].message.content
+        if content:
+            _llm_response_cache[cache_key] = content
+            # Limit cache size to 100 entries
+            if len(_llm_response_cache) > 100:
+                _llm_response_cache.pop(next(iter(_llm_response_cache)))
+        return content
+    except Exception as exc:
+        logger.debug("OpenAI model gpt-5.6-luna call failed: %s", exc)
+        return None
+
+
 def _call_groq_llm(system_prompt: str, user_prompt: str) -> str | None:
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
@@ -70,7 +121,7 @@ def _call_groq_llm(system_prompt: str, user_prompt: str) -> str | None:
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.2,
-            max_tokens=600,
+            max_tokens=500,
         )
         return response.choices[0].message.content
     except Exception as exc:
@@ -87,7 +138,7 @@ def _call_gemini_llm(system_prompt: str, user_prompt: str) -> str | None:
     prompt_combined = system_prompt + "\n\n" + user_prompt
     payload = {
         "contents": [{"parts": [{"text": prompt_combined}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 600}
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 500}
     }
 
     for model_name in models_to_try:
@@ -163,16 +214,21 @@ def answer_farmer_query(
 
     user_prompt = f"Verified Agricultural Context:\n{context_text}\n\n{farmer_notes}\n\nFarmer Question: {query}"
 
-    llm_answer = _call_groq_llm(system_prompt, user_prompt)
+    # 1. Primary Model: OpenAI gpt-5.6-luna (with Rate Limiting & Quota Control)
+    llm_answer = _call_openai_llm(system_prompt, user_prompt)
+
+    # 2. Secondary Fallback: Groq (Llama-3.3-70B)
+    if not llm_answer:
+        llm_answer = _call_groq_llm(system_prompt, user_prompt)
+
+    # 3. Tertiary Fallback: Google Gemini
     if not llm_answer:
         llm_answer = _call_gemini_llm(system_prompt, user_prompt)
 
+    # 4. Quaternary Grounded Passage Fallback
     if not llm_answer:
         primary = passages[0]
-        if is_ta:
-            llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
-        else:
-            llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
+        llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
 
     disclaimer = SAFETY_DISCLAIMER_TA if is_ta else SAFETY_DISCLAIMER_EN
 

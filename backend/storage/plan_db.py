@@ -1,8 +1,9 @@
 """
 plan_db.py
 ==========
-Lightweight SQLite storage for SmartFarm Sowing-to-Harvest Plans:
-- Ensures plans, tasks, and completion checkmarks persist across server restarts
+Persistent SQLite storage for SmartFarm Farmer Accounts, Auth & Sowing-to-Harvest Plans:
+- Lifelong persistence of farmer profiles (Phone + OTP, Google Auth)
+- Per-farmer sowing plans, tasks, and task completion state
 - Zero external dependencies (uses standard python sqlite3)
 """
 from __future__ import annotations
@@ -10,7 +11,8 @@ from __future__ import annotations
 import json
 import sqlite3
 import os
-from datetime import datetime
+import random
+from datetime import datetime, timedelta
 from typing import Any
 
 DB_PATH = os.path.abspath(
@@ -28,9 +30,32 @@ def get_connection() -> sqlite3.Connection:
 def init_db() -> None:
     with get_connection() as conn:
         cursor = conn.cursor()
+        
+        # 1. Farmers / Users Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                phone_number TEXT PRIMARY KEY,
+                full_name TEXT,
+                email TEXT,
+                auth_provider TEXT DEFAULT 'phone_otp',
+                created_at TEXT NOT NULL
+            )
+        """)
+
+        # 2. Temporary OTPs Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS otps (
+                phone_number TEXT PRIMARY KEY,
+                otp_code TEXT NOT NULL,
+                expires_at TEXT NOT NULL
+            )
+        """)
+
+        # 3. Plans Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS plans (
                 plan_id TEXT PRIMARY KEY,
+                farmer_phone TEXT,
                 crop_name TEXT NOT NULL,
                 area_acres REAL NOT NULL,
                 sowing_date TEXT NOT NULL,
@@ -40,9 +65,18 @@ def init_db() -> None:
                 irrigation_source TEXT,
                 budget_analysis_json TEXT,
                 plan_status TEXT DEFAULT 'active',
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (farmer_phone) REFERENCES users(phone_number)
             )
         """)
+
+        # Migration: Check if farmer_phone column exists in plans table
+        cursor.execute("PRAGMA table_info(plans)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if "farmer_phone" not in columns:
+            cursor.execute("ALTER TABLE plans ADD COLUMN farmer_phone TEXT")
+
+        # 4. Plan Tasks Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS plan_tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,18 +103,101 @@ def init_db() -> None:
         conn.commit()
 
 
-def save_plan(plan: dict[str, Any]) -> None:
+# ── Farmer Authentication Storage Functions ─────────────────────────────────
+
+def save_or_update_user(phone_number: str, full_name: str = "Farmer", email: str = "", auth_provider: str = "phone_otp") -> dict[str, Any]:
     init_db()
+    phone_clean = phone_number.strip().replace(" ", "").replace("-", "")
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO users (phone_number, full_name, email, auth_provider, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(phone_number) DO UPDATE SET
+                full_name = COALESCE(NULLIF(excluded.full_name, ''), users.full_name),
+                email = COALESCE(NULLIF(excluded.email, ''), users.email),
+                auth_provider = excluded.auth_provider
+        """, (phone_clean, full_name, email, auth_provider, datetime.now().isoformat()))
+        conn.commit()
+
+    return get_user_by_phone(phone_clean)
+
+
+def get_user_by_phone(phone_number: str) -> dict[str, Any] | None:
+    init_db()
+    phone_clean = phone_number.strip().replace(" ", "").replace("-", "")
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE phone_number = ?", (phone_clean,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def generate_otp_for_phone(phone_number: str) -> str:
+    init_db()
+    phone_clean = phone_number.strip().replace(" ", "").replace("-", "")
+    # Standard 4-digit OTP
+    otp_code = f"{random.randint(1000, 9999)}"
+    expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
+
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO otps (phone_number, otp_code, expires_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(phone_number) DO UPDATE SET
+                otp_code = excluded.otp_code,
+                expires_at = excluded.expires_at
+        """, (phone_clean, otp_code, expires_at))
+        conn.commit()
+
+    return otp_code
+
+
+def verify_otp_for_phone(phone_number: str, otp_code: str) -> bool:
+    init_db()
+    phone_clean = phone_number.strip().replace(" ", "").replace("-", "")
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM otps WHERE phone_number = ?", (phone_clean,))
+        row = cursor.fetchone()
+        if not row:
+            return False
+
+        stored_otp = row["otp_code"]
+        expires_at = datetime.fromisoformat(row["expires_at"])
+        
+        if datetime.now() > expires_at:
+            return False
+
+        # Allow 4-digit code match or master demo code "1234"
+        if otp_code.strip() == stored_otp or otp_code.strip() == "1234":
+            cursor.execute("DELETE FROM otps WHERE phone_number = ?", (phone_clean,))
+            conn.commit()
+            return True
+
+    return False
+
+
+# ── Plan Storage Functions ──────────────────────────────────────────────────
+
+def save_plan(plan: dict[str, Any], farmer_phone: str | None = None) -> None:
+    init_db()
+    phone = farmer_phone or plan.get("farmer_phone", "")
+    if phone:
+        phone = phone.strip().replace(" ", "").replace("-", "")
+
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT OR REPLACE INTO plans (
-                plan_id, crop_name, area_acres, sowing_date, expected_harvest_date,
+                plan_id, farmer_phone, crop_name, area_acres, sowing_date, expected_harvest_date,
                 duration_days, farmer_budget_inr, irrigation_source,
                 budget_analysis_json, plan_status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             plan["plan_id"],
+            phone,
             plan.get("crop_name", "Crop"),
             float(plan.get("area_acres", 1.0)),
             plan.get("sowing_date", datetime.now().strftime("%Y-%m-%d")),
@@ -189,6 +306,22 @@ def update_task_completion(plan_id: str, task_id: str, is_completed: bool, compl
         conn.commit()
 
     return get_plan_by_id(plan_id)
+
+
+def get_plans_by_farmer_phone(phone_number: str) -> list[dict[str, Any]]:
+    init_db()
+    phone_clean = phone_number.strip().replace(" ", "").replace("-", "")
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT plan_id FROM plans WHERE farmer_phone = ? ORDER BY created_at DESC", (phone_clean,))
+        rows = cursor.fetchall()
+
+    plans = []
+    for r in rows:
+        p = get_plan_by_id(r["plan_id"])
+        if p:
+            plans.append(p)
+    return plans
 
 
 def get_all_active_plans() -> list[dict[str, Any]]:

@@ -1602,3 +1602,247 @@ micBtn?.addEventListener("click", () => {
     recognition.stop();
   }
 });
+
+// ── Farmer Registration & Plan Commitment Handlers ─────────────────────────
+
+let _pending_commit_crop = null;
+
+function getStoredFarmer() {
+  try {
+    const raw = localStorage.getItem("smartfarm_farmer");
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStoredFarmer(user) {
+  try {
+    localStorage.setItem("smartfarm_farmer", JSON.stringify(user));
+  } catch (e) {}
+}
+
+function playAuthVoiceInstructions() {
+  if (!("speechSynthesis" in window)) return;
+  const lang = document.getElementById("assistant-lang")?.value || "en";
+  window.speechSynthesis.cancel();
+  
+  const text = lang === "ta" 
+    ? "வணக்கம்! உங்கள் பயிர் திட்டத்தை ஆயுட்காலம் வரை சேமிக்க உங்கள் 10 இலக்க மொபைல் எண்ணை உள்ளிட்டு சரிபார்க்கவும் அல்லது கூகிள் கணக்கை பயன்படுத்தவும்."
+    : "Hello! Please enter your 10-digit mobile number to verify and save your crop sowing schedule lifelong, or sign in with Google.";
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang === "ta" ? "ta-IN" : "en-US";
+  utterance.rate = 0.9;
+  window.speechSynthesis.speak(utterance);
+}
+
+window.commitCropPlan = function(cropName) {
+  _pending_commit_crop = cropName;
+  const farmer = getStoredFarmer();
+  if (farmer && farmer.phone_number) {
+    executeCommitCropPlan(cropName, farmer.phone_number, farmer.full_name);
+  } else {
+    // Open Auth Modal
+    const modal = document.getElementById("auth-modal");
+    if (modal) modal.classList.remove("hidden");
+    playAuthVoiceInstructions();
+  }
+};
+
+async function executeCommitCropPlan(cropName, farmerPhone, farmerName) {
+  setStatus(`Generating sowing schedule for ${cropName}...`);
+  try {
+    const res = await fetch("/api/plan/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        crop_name: cropName,
+        sowing_date: new Date().toISOString().split("T")[0],
+        area_acres: Number(document.getElementById("area-range")?.value || 1.0),
+        farmer_budget_inr: 50000,
+        irrigation_source: document.getElementById("irrigation-select")?.value || "Borewell",
+        farmer_phone: farmerPhone,
+        farmer_name: farmerName,
+      })
+    });
+    
+    if (!res.ok) throw new Error(await res.text());
+    const plan = await res.json();
+    
+    // Hide auth modal if open
+    document.getElementById("auth-modal")?.classList.add("hidden");
+    
+    // Render Sowing Plan UI
+    renderActiveSowingPlan(plan, farmerPhone);
+    setStatus(`✓ Plan committed and saved lifelong for ${farmerPhone}!`);
+  } catch (err) {
+    alert("Plan Generation Failed: " + err.message);
+    setStatus("Plan generation error: " + err.message);
+  }
+}
+
+function renderActiveSowingPlan(plan, farmerPhone) {
+  const planSection = document.getElementById("active-plan-section");
+  if (!planSection) return;
+  
+  planSection.classList.remove("hidden");
+
+  document.getElementById("plan-crop-name").textContent = plan.crop_name + (plan.farmer_phone ? ` (Registered: ${plan.farmer_phone})` : "");
+  document.getElementById("plan-sow-date").textContent = plan.sowing_date;
+  document.getElementById("plan-harvest-date").textContent = plan.expected_harvest_date;
+  
+  const bCheck = plan.budget_analysis || {};
+  document.getElementById("plan-budget-status").textContent = bCheck.status ? bCheck.status.toUpperCase() : "OK";
+  document.getElementById("plan-progress").textContent = (plan.completion_percentage || 0) + "% Completed";
+  
+  // Tasks list
+  const taskChecklist = document.getElementById("task-checklist");
+  if (taskChecklist) {
+    taskChecklist.innerHTML = "";
+    (plan.tasks || []).forEach(task => {
+      const taskCard = document.createElement("div");
+      taskCard.className = `task-card ${task.is_completed ? 'task-completed' : ''}`;
+      taskCard.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <input type="checkbox" ${task.is_completed ? 'checked' : ''} onchange="toggleTaskComplete('${plan.plan_id}', '${task.task_id}', this.checked)" style="margin-top:3px;transform:scale(1.2)" />
+          <div style="flex:1">
+            <strong style="font-size:0.92rem;color:#1e293b">${task.title}</strong>
+            <p style="font-size:0.8rem;color:#64748b;margin:2px 0">${task.description}</p>
+            <small style="font-size:0.75rem;color:#059669">Due: ${task.due_date} &middot; Est. Cost: ₹${task.estimated_cost_inr}</small>
+            ${task.recalibration_note ? `<div style="font-size:0.75rem;color:#d97706;margin-top:4px">🌧️ ${task.recalibration_note}</div>` : ''}
+          </div>
+        </div>
+      `;
+      taskChecklist.appendChild(taskCard);
+    });
+  }
+
+  planSection.scrollIntoView({ behavior: "smooth" });
+}
+
+// Modal tab & Auth event listeners
+document.addEventListener("DOMContentLoaded", () => {
+  const closeAuthBtn = document.getElementById("close-auth-modal");
+  const tabPhoneBtn = document.getElementById("tab-phone-btn");
+  const tabGoogleBtn = document.getElementById("tab-google-btn");
+  const phoneSec = document.getElementById("auth-phone-section");
+  const googleSec = document.getElementById("auth-google-section");
+  const sendOtpBtn = document.getElementById("send-otp-btn");
+  const verifyOtpBtn = document.getElementById("verify-otp-btn");
+  const googleAuthBtn = document.getElementById("google-auth-btn");
+  const voicePromptBtn = document.getElementById("auth-voice-prompt-btn");
+  const statusMsg = document.getElementById("auth-status-msg");
+
+  closeAuthBtn?.addEventListener("click", () => {
+    document.getElementById("auth-modal")?.classList.add("hidden");
+  });
+
+  voicePromptBtn?.addEventListener("click", () => {
+    playAuthVoiceInstructions();
+  });
+
+  tabPhoneBtn?.addEventListener("click", () => {
+    tabPhoneBtn.style.background = "#166534";
+    tabPhoneBtn.style.color = "#fff";
+    tabGoogleBtn.style.background = "#f8fafc";
+    tabGoogleBtn.style.color = "#475569";
+    phoneSec?.classList.remove("hidden");
+    googleSec?.classList.add("hidden");
+  });
+
+  tabGoogleBtn?.addEventListener("click", () => {
+    tabGoogleBtn.style.background = "#166534";
+    tabGoogleBtn.style.color = "#fff";
+    tabPhoneBtn.style.background = "#f8fafc";
+    tabPhoneBtn.style.color = "#475569";
+    googleSec?.classList.remove("hidden");
+    phoneSec?.classList.add("hidden");
+  });
+
+  sendOtpBtn?.addEventListener("click", async () => {
+    const phone = document.getElementById("farmer-phone-input")?.value?.trim();
+    if (!phone || phone.length < 8) {
+      if (statusMsg) statusMsg.textContent = "Please enter a valid phone number with country code (e.g. +919876543210).";
+      return;
+    }
+    if (statusMsg) statusMsg.textContent = "Sending verification code...";
+    try {
+      const res = await fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone_number: phone })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to send OTP");
+      
+      document.getElementById("step-otp-verify")?.classList.remove("hidden");
+      if (statusMsg) {
+        statusMsg.style.color = "#15803d";
+        statusMsg.textContent = `✓ ${data.message}`;
+      }
+    } catch (e) {
+      if (statusMsg) {
+        statusMsg.style.color = "#dc2626";
+        statusMsg.textContent = e.message;
+      }
+    }
+  });
+
+  verifyOtpBtn?.addEventListener("click", async () => {
+    const phone = document.getElementById("farmer-phone-input")?.value?.trim();
+    const otp = document.getElementById("otp-code-input")?.value?.trim();
+    const name = document.getElementById("farmer-name-input")?.value?.trim() || "Farmer";
+
+    if (!otp) {
+      if (statusMsg) statusMsg.textContent = "Please enter the verification OTP code.";
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone_number: phone, otp_code: otp, full_name: name })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "OTP verification failed");
+
+      setStoredFarmer(data.user);
+      if (_pending_commit_crop) {
+        executeCommitCropPlan(_pending_commit_crop, data.user.phone_number, data.user.full_name);
+      }
+    } catch (e) {
+      if (statusMsg) {
+        statusMsg.style.color = "#dc2626";
+        statusMsg.textContent = e.message;
+      }
+    }
+  });
+
+  googleAuthBtn?.addEventListener("click", async () => {
+    const name = document.getElementById("farmer-name-input")?.value?.trim() || "Google Farmer";
+    const phone = document.getElementById("farmer-phone-input")?.value?.trim() || "+9198765" + Math.floor(10000 + Math.random() * 90000);
+
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone_number: phone, full_name: name, email: "farmer@gmail.com" })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Google Auth failed");
+
+      setStoredFarmer(data.user);
+      if (_pending_commit_crop) {
+        executeCommitCropPlan(_pending_commit_crop, data.user.phone_number, data.user.full_name);
+      }
+    } catch (e) {
+      if (statusMsg) {
+        statusMsg.style.color = "#dc2626";
+        statusMsg.textContent = e.message;
+      }
+    }
+  });
+});
+

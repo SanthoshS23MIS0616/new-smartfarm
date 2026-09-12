@@ -26,7 +26,7 @@ class PredictionInput(BaseModel):
     longitude: Optional[float] = Field(default=None, ge=68.0, le=98.0)
     crop_year: Optional[int] = Field(default=None, ge=1990, le=2100)
     top_k: int = Field(default=3, ge=1, le=10)
-    # New context fields
+    # Context fields
     previous_crop: Optional[str] = Field(
         default=None,
         description="Crop grown last season. Used to penalise mono-cropping.",
@@ -45,12 +45,31 @@ class TrainRequest(BaseModel):
     data_dir: Optional[str] = None
 
 
+class SendOTPRequest(BaseModel):
+    phone_number: str = Field(..., description="Farmer mobile number with country code")
+
+
+class VerifyOTPRequest(BaseModel):
+    phone_number: str
+    otp_code: str
+    full_name: Optional[str] = "Farmer"
+
+
+class GoogleAuthRequest(BaseModel):
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    full_name: Optional[str] = "Farmer"
+    google_token: Optional[str] = None
+
+
 class PlanGenerateRequest(BaseModel):
     crop_name: str
     sowing_date: Optional[str] = None
     area_acres: float = Field(default=1.0, gt=0)
     farmer_budget_inr: float = Field(default=50000.0, ge=0)
     irrigation_source: str = "Borewell"
+    farmer_phone: Optional[str] = None
+    farmer_name: Optional[str] = "Farmer"
 
 
 class TaskConfirmRequest(BaseModel):

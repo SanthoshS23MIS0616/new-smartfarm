@@ -6,11 +6,14 @@ from fastapi import APIRouter, Header, HTTPException
 
 from backend.app.schemas import (
     AssistantAskRequest,
+    GoogleAuthRequest,
     PlanGenerateRequest,
     PlanRecheckRequest,
     PredictionInput,
+    SendOTPRequest,
     TaskConfirmRequest,
     TrainRequest,
+    VerifyOTPRequest,
 )
 from backend.app.services.predictor import get_engine, model_artifact_status, train_models
 
@@ -71,11 +74,6 @@ def train(
     request: TrainRequest,
     x_admin_key: str | None = Header(default=None),
 ) -> dict:
-    """Retrain all models from disk CSVs.
-
-    Requires the ``X-Admin-Key`` header to be set correctly.
-    Set the ``ADMIN_API_KEY`` environment variable to override the default key.
-    """
     _require_admin_key(x_admin_key)
     try:
         return train_models(data_dir=request.data_dir)
@@ -83,7 +81,80 @@ def train(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-# ── Active Plan Store (in-memory persistent session) ─────────────────────────
+# ── Farmer Authentication & OTP Endpoints ────────────────────────────────────
+
+@router.post("/auth/otp/send")
+def send_otp(request: SendOTPRequest) -> dict:
+    from backend.storage.plan_db import generate_otp_for_phone
+    phone = request.phone_number.strip().replace(" ", "").replace("-", "")
+    if len(phone) < 8:
+        raise HTTPException(status_code=400, detail="Invalid phone number format. Please enter a valid mobile number.")
+
+    otp_code = generate_otp_for_phone(phone)
+    # Log simulated SMS / Twilio dispatch
+    return {
+        "status": "success",
+        "message": f"OTP sent to {phone}. (Demo OTP Code: {otp_code} or use master code 1234)",
+        "phone_number": phone,
+        "otp_demo": otp_code,
+    }
+
+
+@router.post("/auth/otp/verify")
+def verify_otp(request: VerifyOTPRequest) -> dict:
+    from backend.storage.plan_db import verify_otp_for_phone, save_or_update_user
+    phone = request.phone_number.strip().replace(" ", "").replace("-", "")
+    is_valid = verify_otp_for_phone(phone, request.otp_code)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP. Please try again.")
+
+    user = save_or_update_user(
+        phone_number=phone,
+        full_name=request.full_name or "Farmer",
+        auth_provider="phone_otp"
+    )
+    return {
+        "status": "success",
+        "message": "Authentication successful.",
+        "user": user,
+    }
+
+
+@router.post("/auth/google")
+def google_auth(request: GoogleAuthRequest) -> dict:
+    from backend.storage.plan_db import save_or_update_user
+    phone = request.phone_number or "google_user_" + os.urandom(4).hex()
+    email = request.email or ""
+    full_name = request.full_name or "Google Farmer User"
+
+    user = save_or_update_user(
+        phone_number=phone,
+        full_name=full_name,
+        email=email,
+        auth_provider="google_oauth"
+    )
+    return {
+        "status": "success",
+        "message": "Google authentication successful.",
+        "user": user,
+    }
+
+
+@router.get("/farmer/{phone_number}/plans")
+def get_farmer_plans(phone_number: str) -> dict:
+    from backend.storage.plan_db import get_plans_by_farmer_phone, get_user_by_phone
+    phone = phone_number.strip().replace(" ", "").replace("-", "")
+    user = get_user_by_phone(phone)
+    plans = get_plans_by_farmer_phone(phone)
+    return {
+        "phone_number": phone,
+        "user": user,
+        "plans_count": len(plans),
+        "plans": plans,
+    }
+
+
+# ── Active Sowing-to-Harvest Plans & Execution ──────────────────────────────
 _ACTIVE_PLANS: dict[str, dict] = {}
 
 
@@ -100,8 +171,13 @@ def generate_plan(request: PlanGenerateRequest) -> dict:
             farmer_budget_inr=request.farmer_budget_inr,
             irrigation_source=request.irrigation_source,
         )
+        if request.farmer_phone:
+            plan["farmer_phone"] = request.farmer_phone.strip().replace(" ", "").replace("-", "")
+            from backend.storage.plan_db import save_or_update_user
+            save_or_update_user(phone_number=plan["farmer_phone"], full_name=request.farmer_name or "Farmer")
+
         from backend.storage.plan_db import save_plan
-        save_plan(plan)
+        save_plan(plan, farmer_phone=request.farmer_phone)
         _ACTIVE_PLANS[plan["plan_id"]] = plan
         return plan
     except ValueError as exc:
@@ -132,7 +208,6 @@ def confirm_task(request: TaskConfirmRequest) -> dict:
     )
 
     if not updated_plan:
-        # Fallback to in-memory if not in db
         plan = _ACTIVE_PLANS.get(request.plan_id)
         if not plan:
             raise HTTPException(status_code=404, detail=f"Plan '{request.plan_id}' not found.")
@@ -161,7 +236,7 @@ def confirm_task(request: TaskConfirmRequest) -> dict:
 
 @router.post("/plan/recheck")
 def recheck_plan(request: PlanRecheckRequest) -> dict:
-    from backend.notify.escalation_engine import recalibrate_entire_plan
+    from backend.notify.escalation_engine import recalibrate_entire_plan, dispatch_escalation_alert
     from backend.storage.plan_db import get_plan_by_id, update_plan_tasks
 
     plan = request.plan
@@ -172,6 +247,13 @@ def recheck_plan(request: PlanRecheckRequest) -> dict:
         raise HTTPException(status_code=400, detail="Either plan_id or plan object must be provided.")
 
     recalibrated = recalibrate_entire_plan(plan, current_weather=request.weather)
+    
+    # If farmer_phone is attached to the plan, trigger dispatch logic
+    farmer_phone = plan.get("farmer_phone")
+    if farmer_phone:
+        for alert in recalibrated.get("active_alerts", []):
+            dispatch_escalation_alert(alert, farmer_phone=farmer_phone)
+
     if recalibrated.get("plan_id"):
         update_plan_tasks(recalibrated["plan_id"], recalibrated.get("tasks", []))
         _ACTIVE_PLANS[recalibrated["plan_id"]] = recalibrated
@@ -187,4 +269,3 @@ def ask_assistant(request: AssistantAskRequest) -> dict:
         farmer_context=request.farmer_context,
         language=request.language,
     )
-

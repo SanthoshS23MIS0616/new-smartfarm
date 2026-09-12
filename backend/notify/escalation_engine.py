@@ -261,28 +261,41 @@ def dispatch_escalation_alert(
             dispatch_result["sid"] = message.sid
 
         elif channel in ("sms", "whatsapp_sms_call"):
-            message = client.messages.create(
-                from_=from_phone,
-                to=farmer_phone,
-                body=f"SmartFarm Tier {tier} Alert: {alert.get('message')}"
-            )
-            dispatch_result["status"] = "dispatched"
-            dispatch_result["sid"] = message.sid
+            try:
+                message = client.messages.create(
+                    from_=from_phone,
+                    to=farmer_phone,
+                    body=f"SmartFarm Tier {tier} Alert: {alert.get('message')}"
+                )
+                dispatch_result["status"] = "dispatched"
+                dispatch_result["sid"] = message.sid
+            except Exception as sms_err:
+                logger.warning("Twilio SMS dispatch note: %s", sms_err)
+                dispatch_result["sms_note"] = str(sms_err)
 
-            # Also place automated IVR Voice Call in Tamil or English
+            # Automated IVR Voice Call in Tamil or English
             try:
                 is_ta = bool(alert.get("tamil_message"))
                 speech_text = alert.get("tamil_message") or alert.get("message")
                 lang_code = "ta-IN" if is_ta else "en-IN"
                 twiml_str = f'<Response><Say language="{lang_code}">{speech_text}</Say></Response>'
-                call = client.calls.create(
-                    twiml=twiml_str,
-                    to=farmer_phone,
-                    from_=from_phone
-                )
+                try:
+                    call = client.calls.create(
+                        url="https://webhooks.twilio.com/v1/Voice/Template/voice_text_to_speech",
+                        to=farmer_phone,
+                        from_=from_phone
+                    )
+                except Exception:
+                    call = client.calls.create(
+                        twiml=twiml_str,
+                        to=farmer_phone,
+                        from_=from_phone
+                    )
+                dispatch_result["status"] = "dispatched"
                 dispatch_result["call_sid"] = call.sid
             except Exception as call_err:
                 logger.warning("Twilio voice call dispatch note: %s", call_err)
+                dispatch_result["call_note"] = str(call_err)
 
         return dispatch_result
     except Exception as exc:
