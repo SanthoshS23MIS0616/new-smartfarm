@@ -224,7 +224,8 @@ def dispatch_escalation_alert(
     account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
     auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
     from_phone = os.environ.get("TWILIO_PHONE_NUMBER")
-    farmer_phone = os.environ.get("FARMER_PHONE_NUMBER", farmer_phone)
+    if not farmer_phone or farmer_phone == "+919876543210":
+        farmer_phone = os.environ.get("FARMER_PHONE_NUMBER", farmer_phone)
 
     tier = alert.get("tier", 1)
     channel = alert.get("channel", "in_app")
@@ -267,6 +268,21 @@ def dispatch_escalation_alert(
             )
             dispatch_result["status"] = "dispatched"
             dispatch_result["sid"] = message.sid
+
+            # Also place automated IVR Voice Call in Tamil or English
+            try:
+                is_ta = bool(alert.get("tamil_message"))
+                speech_text = alert.get("tamil_message") or alert.get("message")
+                lang_code = "ta-IN" if is_ta else "en-IN"
+                twiml_str = f'<Response><Say language="{lang_code}">{speech_text}</Say></Response>'
+                call = client.calls.create(
+                    twiml=twiml_str,
+                    to=farmer_phone,
+                    from_=from_phone
+                )
+                dispatch_result["call_sid"] = call.sid
+            except Exception as call_err:
+                logger.warning("Twilio voice call dispatch note: %s", call_err)
 
         return dispatch_result
     except Exception as exc:
