@@ -252,13 +252,26 @@ def dispatch_escalation_alert(
         client = Client(account_sid, auth_token)
 
         if channel == "whatsapp":
-            message = client.messages.create(
-                from_=f"whatsapp:{from_phone}",
-                to=f"whatsapp:{farmer_phone}",
-                body=f"🌾 *SmartFarm Alert (Tier {tier})*\n\n{msg}"
-            )
-            dispatch_result["status"] = "dispatched"
-            dispatch_result["sid"] = message.sid
+            try:
+                message = client.messages.create(
+                    from_=f"whatsapp:{from_phone}",
+                    to=f"whatsapp:{farmer_phone}",
+                    body=f"🌾 *SmartFarm Alert (Tier {tier})*\n\n{msg}"
+                )
+                dispatch_result["status"] = "dispatched"
+                dispatch_result["sid"] = message.sid
+            except Exception as wa_err:
+                try:
+                    message = client.messages.create(
+                        from_="whatsapp:+14155238886",
+                        to=f"whatsapp:{farmer_phone}",
+                        body=f"🌾 *SmartFarm Alert (Tier {tier})*\n\n{msg}"
+                    )
+                    dispatch_result["status"] = "dispatched"
+                    dispatch_result["sid"] = message.sid
+                except Exception as wa_sandbox_err:
+                    logger.warning("Twilio WhatsApp dispatch note: %s", wa_sandbox_err)
+                    dispatch_result["whatsapp_note"] = str(wa_sandbox_err)
 
         elif channel in ("sms", "whatsapp_sms_call"):
             try:
