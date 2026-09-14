@@ -288,22 +288,15 @@ def dispatch_escalation_alert(
 
             # Automated IVR Voice Call in Tamil or English
             try:
-                is_ta = bool(alert.get("tamil_message"))
-                speech_text = alert.get("tamil_message") or alert.get("message")
-                lang_code = "ta-IN" if is_ta else "en-IN"
-                twiml_str = f'<Response><Say language="{lang_code}">{speech_text}</Say></Response>'
-                try:
-                    call = client.calls.create(
-                        url="https://webhooks.twilio.com/v1/Voice/Template/voice_text_to_speech",
-                        to=farmer_phone,
-                        from_=from_phone
-                    )
-                except Exception:
-                    call = client.calls.create(
-                        twiml=twiml_str,
-                        to=farmer_phone,
-                        from_=from_phone
-                    )
+                import urllib.parse
+                speech_text = alert.get("message") or "SmartFarm critical task alert. Please inspect your crop immediately."
+                # Hosted TwiML URL on twimlets.com (officially supported by Twilio on all trial and production accounts)
+                twimlet_url = f"https://twimlets.com/message?Message%5B0%5D={urllib.parse.quote(speech_text)}"
+                call = client.calls.create(
+                    url=twimlet_url,
+                    to=farmer_phone,
+                    from_=from_phone
+                )
                 dispatch_result["status"] = "dispatched"
                 dispatch_result["call_sid"] = call.sid
             except Exception as call_err:

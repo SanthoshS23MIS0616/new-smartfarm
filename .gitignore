@@ -5,3 +5,5 @@ tmp_run_*.txt
 uvicorn_pid.txt
 *.db
 .env
+".env" 
+"*.png" 

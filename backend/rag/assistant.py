@@ -85,24 +85,29 @@ def _call_openai_llm(system_prompt: str, user_prompt: str) -> str | None:
     try:
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
-        response = client.chat.completions.create(
-            model="gpt-5.6-luna",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.2,
-            max_tokens=500,
-        )
-        content = response.choices[0].message.content
-        if content:
-            _llm_response_cache[cache_key] = content
-            # Limit cache size to 100 entries
-            if len(_llm_response_cache) > 100:
-                _llm_response_cache.pop(next(iter(_llm_response_cache)))
-        return content
+        for model_name in ["gpt-5.6-luna", "gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"]:
+            try:
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=0.2,
+                    max_tokens=500,
+                )
+                content = response.choices[0].message.content
+                if content:
+                    _llm_response_cache[cache_key] = content
+                    if len(_llm_response_cache) > 100:
+                        _llm_response_cache.pop(next(iter(_llm_response_cache)))
+                    return content
+            except Exception as model_err:
+                logger.debug("OpenAI model %s failed: %s", model_name, model_err)
+                continue
+        return None
     except Exception as exc:
-        logger.debug("OpenAI model gpt-5.6-luna call failed: %s", exc)
+        logger.debug("OpenAI API call failed: %s", exc)
         return None
 
 

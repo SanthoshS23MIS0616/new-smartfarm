@@ -89,3 +89,11 @@ class AssistantAskRequest(BaseModel):
     crop_name: Optional[str] = None
     farmer_context: Optional[dict] = None
     language: Optional[str] = None
+
+
+class SoilEstimateRequest(BaseModel):
+    latitude: float = Field(..., ge=6.0, le=38.5)
+    longitude: float = Field(..., ge=68.0, le=98.0)
+    district: Optional[str] = None
+    state: Optional[str] = None
+

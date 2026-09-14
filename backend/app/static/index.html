@@ -15,6 +15,20 @@
   <body>
     <main class="page-shell">
 
+      <!-- ── Header Navbar ────────────────────────────────────────────── -->
+      <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#ffffff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.6rem">🌾</span>
+          <span style="font-size:1.15rem;font-weight:800;color:#14532d;letter-spacing:-0.5px">SmartFarm Intelligence</span>
+          <span style="font-size:0.75rem;background:#f0fdf4;color:#15803d;padding:3px 8px;border-radius:12px;border:1px solid #bbf7d0;font-weight:600">🟢 Twilio & Supabase Ready</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button type="button" id="top-login-btn" style="padding:8px 16px;background:#166534;color:#ffffff;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+            👤 <span>Farmer Login / Register</span>
+          </button>
+        </div>
+      </header>
+
       <!-- ── Hero ─────────────────────────────────────────────────── -->
       <section class="hero-card">
         <div class="hero-copy">
@@ -134,17 +148,17 @@
               </div>
             </div>
             <div class="map-meta rainfall-meta">
-              <div class="map-meta-item">
-                <span>Recent 30-Day Rain</span>
+              <div class="map-meta-item" title="Used by real-time escalation engine to automatically suppress or postpone irrigation tasks">
+                <span>Recent 30-Day Rain (Irrigation Suppression)</span>
                 <strong id="recent-rainfall-display">Waiting for map</strong>
               </div>
-              <div class="map-meta-item">
-                <span>Climate Rainfall Input</span>
+              <div class="map-meta-item" title="Blended precipitation feature feeding the LightGBM/CatBoost ML model">
+                <span>Climate Model Rain (Feeds ML Engine)</span>
                 <strong id="climate-rainfall-display">Waiting for map</strong>
               </div>
             </div>
             <div id="location-banner" class="location-banner">Click the map or draw your land boundary.</div>
-            <p class="source-line">Weather source: Open-Meteo forecast + archive APIs</p>
+            <p class="source-line">Weather source: Open-Meteo live forecast + historical archive APIs</p>
           </section>
         </section>
 
@@ -156,6 +170,9 @@
           </div>
 
           <div id="status" class="status-pill">Loading metadata...</div>
+          <div id="soil-calibration-notice" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:8px 12px;border-radius:8px;margin:10px 0;font-size:0.82rem;display:none;line-height:1.4">
+            <strong>ℹ️ Precision Notice:</strong> Soil parameters are calibrated from the ICAR regional agro-climatic baseline. For micro-plot precision, enter your lab Soil Health Card values directly on the sliders.
+          </div>
           <div id="shap-sentence" class="shap-sentence hidden"></div>
           <div id="best-crop" class="best-crop-card hidden"></div>
           <div id="ideal-ground-card" class="best-crop-card hidden"></div>
@@ -168,10 +185,6 @@
                 <h3>Why This Crop?</h3>
                 <div id="local-explanation"></div>
               </article>
-              <article class="xai-card">
-                <h3>Model Comparison</h3>
-                <div id="model-overview" class="graph-list"></div>
-              </article>
             </div>
             <div class="xai-card">
               <h3>Crop Comparison Radar</h3>
@@ -182,26 +195,9 @@
             </div>
             <div class="xai-grid">
               <article class="xai-card">
-                <h3>Global Feature Importance</h3>
-                <div id="global-features" class="feature-chips"></div>
-              </article>
-              <article class="xai-card">
                 <h3>Rejected Crops</h3>
                 <div id="rejected-crops" class="rejection-list"></div>
               </article>
-            </div>
-            <div class="xai-card">
-              <h3>SHAP Summary Graphs</h3>
-              <div class="plot-grid">
-                <figure class="plot-card">
-                  <figcaption>LightGBM Summary</figcaption>
-                  <img id="plot-lightgbm" alt="LightGBM SHAP summary plot" />
-                </figure>
-                <figure class="plot-card">
-                  <figcaption>CatBoost Summary</figcaption>
-                  <img id="plot-catboost" alt="CatBoost SHAP summary plot" />
-                </figure>
-              </div>
             </div>
           </section>
 
@@ -238,6 +234,7 @@
                 <p id="plan-subtitle" style="margin:4px 0 0 0;font-size:0.88rem;color:#166534">Dated management timeline with confirmation-gated escalation.</p>
               </div>
               <div style="display:flex;gap:8px;align-items:center">
+                <button id="download-plan-pdf-btn" type="button" class="primary-btn" style="background:#166534;color:#fff;font-weight:700;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px">📥 Download Full Plan PDF</button>
                 <button id="recheck-plan-btn" type="button" class="ghost-btn" style="background:#fff;font-weight:600;color:#15803d;border:1px solid #86efac">⚡ Check Weather &amp; Recalibrate</button>
               </div>
             </div>
@@ -374,12 +371,21 @@
       </footer>
     </main>
 
+    <!-- Hidden placeholder divs for removed XAI elements (prevents JS errors) -->
+    <div id="model-overview" style="display:none"></div>
+    <div id="global-features" style="display:none"></div>
+    <div id="plot-lightgbm" style="display:none"></div>
+    <div id="plot-catboost" style="display:none"></div>
+
+    <!-- Google Identity Services for real Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
-    <script src="/static/app.js?v=20260911-2"></script>
+    <script src="/static/app.js?v=20260914-3"></script>
   </body>
 </html>

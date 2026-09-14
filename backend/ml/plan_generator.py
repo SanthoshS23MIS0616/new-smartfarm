@@ -114,6 +114,32 @@ def generate_sowing_plan(
     # ── Milestone Task Generator ──────────────────────────────────────────────
     f_plan = pop.get("fertilizer_plan", {})
     crit_irr = pop.get("critical_irrigation_stages", [])
+    is_legume = "pulse" in pop.get("category", "").lower() or crop_name.lower() in (
+        "blackgram", "chickpea", "lentil", "mungbean", "pigeonpeas", "mothbeans"
+    )
+
+    t2_desc = (
+        f"Bio-prime seeds with Rhizobium culture (30g/kg) + Phosphobacteria (30g/kg) + Trichoderma viride (4g/kg) "
+        f"to stimulate biological nitrogen fixation and prevent root rot. Sow at 30x10 cm spacing."
+        if is_legume
+        else f"Treat seeds with bio-priming culture ({f_plan.get('organic_alternative', 'Bio-inoculants')}) and complete sowing."
+    )
+
+    t4_title = "Foliar Nutrition Round 1 (2% DAP Spray) & Stand Inspection" if is_legume else "Topdress Round 1 + Vegetative Irrigation"
+    t4_desc = (
+        "CRITICAL: Avoid granular urea soil topdressing! (Soil mineral nitrogen inhibits Rhizobium nodulation and nitrogenase). "
+        "Apply foliar 2% DAP spray (2 kg DAP soaked overnight in 10 L water, supernatant diluted to 100 L) at flower initiation."
+        if is_legume
+        else f"Apply {f_plan.get('topdress_1', 'Vegetative N split')} followed immediately by irrigation."
+    )
+
+    t7_title = "Pod Setting Foliar Booster (TNAU Pulse Wonder)" if is_legume else "Topdress Round 2 / Pod-Fruit Setting"
+    t7_desc = (
+        "Foliar spray TNAU Pulse Wonder @ 2 kg/acre in 200 L water at 45 DAS to arrest flower shedding, "
+        "boost pod elongation, and enhance test grain weight by 15-20%."
+        if is_legume
+        else f"Apply {f_plan.get('topdress_2', 'Secondary topdress')} to enhance grain/fruit weight."
+    )
 
     tasks: list[dict[str, Any]] = [
         {
@@ -133,8 +159,8 @@ def generate_sowing_plan(
             "day_offset": 0,
             "due_date": sow_dt.isoformat(),
             "task_type": "sowing",
-            "title": "Seed Treatment & Sowing",
-            "description": f"Treat seeds with bio-priming culture ({pop.get('fertilizer_plan', {}).get('organic_alternative', 'Bio-inoculants')}) and complete sowing.",
+            "title": "Rhizobium Bio-Priming Seed Treatment & Sowing" if is_legume else "Seed Treatment & Sowing",
+            "description": t2_desc,
             "estimated_cost_inr": round(budget_check["cost_breakdown"]["seed_inr"], 2),
             "is_critical": True,
             "is_completed": False,
@@ -157,8 +183,8 @@ def generate_sowing_plan(
             "day_offset": max(25, int(duration * 0.28)),
             "due_date": (sow_dt + timedelta(days=max(25, int(duration * 0.28)))).isoformat(),
             "task_type": "fertilizer",
-            "title": "Topdress Round 1 + Vegetative Irrigation",
-            "description": f"Apply {f_plan.get('topdress_1', 'Vegetative N split')} followed immediately by irrigation.",
+            "title": t4_title,
+            "description": t4_desc,
             "estimated_cost_inr": round(budget_check["cost_breakdown"]["fertilizer_inr"] * 0.35, 2),
             "is_critical": True,
             "is_completed": False,
@@ -190,11 +216,11 @@ def generate_sowing_plan(
         },
         {
             "task_id": "TSK-007",
-            "day_offset": max(70, int(duration * 0.70)),
-            "due_date": (sow_dt + timedelta(days=max(70, int(duration * 0.70)))).isoformat(),
+            "day_offset": max(60, int(duration * 0.65)),
+            "due_date": (sow_dt + timedelta(days=max(60, int(duration * 0.65)))).isoformat(),
             "task_type": "fertilizer",
-            "title": "Topdress Round 2 / Pod-Fruit Setting",
-            "description": f"Apply {f_plan.get('topdress_2', 'Secondary topdress')} to enhance grain/fruit weight.",
+            "title": t7_title,
+            "description": t7_desc,
             "estimated_cost_inr": round(budget_check["cost_breakdown"]["fertilizer_inr"] * 0.25, 2),
             "is_critical": False,
             "is_completed": False,
@@ -218,7 +244,7 @@ def generate_sowing_plan(
             "due_date": harvest_dt.isoformat(),
             "task_type": "harvest",
             "title": "Harvest & Post-Harvest Storage",
-            "description": f"Harvest at physiological maturity. Expected yield: {pop.get('yield_kg_per_acre', 'standard')} per acre.",
+            "description": f"Harvest at physiological maturity (pods dark brown/black). Expected yield: {pop.get('yield_kg_per_acre', 'standard')} per acre.",
             "estimated_cost_inr": round(budget_check["cost_breakdown"]["labor_inr"] * 0.40, 2),
             "is_critical": True,
             "is_completed": False,
@@ -227,6 +253,14 @@ def generate_sowing_plan(
     ]
 
     plan_id = f"PLAN-{crop_name[:3].upper()}-{sow_dt.strftime('%Y%m%d')}-{int(area_acres*100)}"
+
+    # ── 1-Year Multi-Crop Rotation Plan (365-Day Cycle with 20-Day Soil Rest Gaps) ──
+    annual_rotation = generate_annual_crop_cycle(
+        primary_crop=pop["crop_name"],
+        start_date=sow_dt,
+        area_acres=area_acres,
+        farmer_budget_inr=farmer_budget_inr,
+    )
 
     return {
         "plan_id": plan_id,
@@ -243,8 +277,147 @@ def generate_sowing_plan(
         "growth_stages": pop.get("growth_stages", []),
         "budget_analysis": budget_check,
         "tasks": tasks,
+        "annual_rotation_cycle": annual_rotation,
         "total_tasks_count": len(tasks),
         "completed_tasks_count": 0,
         "plan_status": "active",
         "created_at": datetime.now().isoformat(),
     }
+
+
+def generate_annual_crop_cycle(
+    primary_crop: str,
+    start_date: date,
+    area_acres: float = 1.0,
+    farmer_budget_inr: float = 50000.0,
+) -> dict[str, Any]:
+    """
+    Generates a realistic 1-Year (365-Day) Multi-Crop Rotation Plan
+    with mandatory 20-day safety rest & recuperation gaps between successive crops.
+    """
+    db = load_pop_database()
+    p1 = db.get(primary_crop.lower()) or get_crop_pop(primary_crop) or list(db.values())[0]
+
+    # Crop rotation partner selection based on ICAR ecological principles:
+    cat1 = p1.get("category", "Cereal")
+    
+    # Partner 2 (Rabi / Succession):
+    if "Pulse" in cat1 or primary_crop.lower() in ("blackgram", "chickpea", "lentil", "mungbean", "pigeonpeas", "mothbeans"):
+        # Legume primary -> rotate with Cereal or Oilseed to use fixed nitrogen
+        c2_name = "Maize" if "maize" in db else "Rice"
+    elif "Cereal" in cat1 or primary_crop.lower() in ("rice", "maize"):
+        # Cereal primary -> rotate with nitrogen-fixing Legume
+        c2_name = "Chickpea" if "chickpea" in db else "Lentil"
+    elif "Fiber" in cat1 or "Commercial" in cat1 or primary_crop.lower() in ("cotton", "jute"):
+        c2_name = "Chickpea" if "chickpea" in db else "Blackgram"
+    else:
+        c2_name = "Blackgram" if "blackgram" in db else "Maize"
+
+    p2 = db.get(c2_name.lower()) or list(db.values())[0]
+
+    # Partner 3 (Summer / Zaid / Catch crop):
+    if primary_crop.lower() == "blackgram":
+        c3_name = "Mungbean" if "mungbean" in db else "Lentil"
+    elif c2_name.lower() == "chickpea":
+        c3_name = "Blackgram" if "blackgram" in db else "Maize"
+    else:
+        c3_name = "Mungbean" if "mungbean" in db else "Chickpea"
+    p3 = db.get(c3_name.lower()) or list(db.values())[0]
+
+    # Cycle 1:
+    dur1 = int(p1.get("total_duration_days", 95))
+    sow1 = start_date
+    harv1 = sow1 + timedelta(days=dur1)
+
+    gap1_start = harv1
+    gap1_end = gap1_start + timedelta(days=20)
+
+    # Cycle 2:
+    dur2 = int(p2.get("total_duration_days", 100))
+    sow2 = gap1_end
+    harv2 = sow2 + timedelta(days=dur2)
+
+    gap2_start = harv2
+    gap2_end = gap2_start + timedelta(days=20)
+
+    # Cycle 3 (Remainder of 365 days):
+    days_used = dur1 + 20 + dur2 + 20
+    remaining_days = max(60, 365 - days_used)
+    dur3 = min(int(p3.get("total_duration_days", 70)), remaining_days)
+    sow3 = gap2_end
+    harv3 = sow3 + timedelta(days=dur3)
+
+    # Financial estimates per cycle (scaled to area)
+    profit1 = round(float(p1.get("costs_per_acre", {}).get("total_inr", 15000)) * 1.65 * area_acres, 2)
+    profit2 = round(float(p2.get("costs_per_acre", {}).get("total_inr", 14000)) * 1.55 * area_acres, 2)
+    profit3 = round(float(p3.get("costs_per_acre", {}).get("total_inr", 12000)) * 1.45 * area_acres, 2)
+    total_annual_profit = round(profit1 + profit2 + profit3, 2)
+
+    cycles = [
+        {
+            "cycle_number": 1,
+            "crop_name": p1["crop_name"],
+            "local_name": p1.get("local_name", ""),
+            "category": p1.get("category", "Field Crop"),
+            "season_label": "Kharif / Main Season",
+            "sowing_date": sow1.isoformat(),
+            "expected_harvest_date": harv1.isoformat(),
+            "duration_days": dur1,
+            "expected_yield_per_acre": str(p1.get("yield_kg_per_acre", "800-1200 kg")),
+            "estimated_net_profit_inr": profit1,
+            "role": "Primary high-value seasonal harvest",
+            "safety_gap_after": {
+                "duration_days": 20,
+                "start_date": gap1_start.isoformat(),
+                "end_date": gap1_end.isoformat(),
+                "activity": "Deep summer/post-harvest ploughing, soil solarization, sunnhemp/dhaincha green manuring.",
+                "soil_benefit": "Replenishes +15 kg/ha organic nitrogen, suppresses fungal spores and weed seedbank.",
+            },
+        },
+        {
+            "cycle_number": 2,
+            "crop_name": p2["crop_name"],
+            "local_name": p2.get("local_name", ""),
+            "category": p2.get("category", "Field Crop"),
+            "season_label": "Rabi / Winter Succession",
+            "sowing_date": sow2.isoformat(),
+            "expected_harvest_date": harv2.isoformat(),
+            "duration_days": dur2,
+            "expected_yield_per_acre": str(p2.get("yield_kg_per_acre", "1000-1500 kg")),
+            "estimated_net_profit_inr": profit2,
+            "role": "Rotational nutrient-balancing and pest cycle break",
+            "safety_gap_after": {
+                "duration_days": 20,
+                "start_date": gap2_start.isoformat(),
+                "end_date": gap2_end.isoformat(),
+                "activity": "Stubble incorporation, FYM (Farm Yard Manure 4-5 t/acre) basal application, harrowing.",
+                "soil_benefit": "Increases microbial biomass carbon and soil water-holding capacity.",
+            },
+        },
+        {
+            "cycle_number": 3,
+            "crop_name": p3["crop_name"],
+            "local_name": p3.get("local_name", ""),
+            "category": p3.get("category", "Field Crop"),
+            "season_label": "Summer / Zaid Catch Crop",
+            "sowing_date": sow3.isoformat(),
+            "expected_harvest_date": harv3.isoformat(),
+            "duration_days": dur3,
+            "expected_yield_per_acre": str(p3.get("yield_kg_per_acre", "600-900 kg")),
+            "estimated_net_profit_inr": profit3,
+            "role": "Short-duration catch crop maximizing annual farm land productivity",
+            "safety_gap_after": None,
+        },
+    ]
+
+    return {
+        "cycle_duration_total_days": (harv3 - sow1).days,
+        "start_date": sow1.isoformat(),
+        "end_date": harv3.isoformat(),
+        "total_crops": 3,
+        "total_rest_gap_days": 40,
+        "rest_gap_per_interval_days": 20,
+        "estimated_annual_profit_inr": total_annual_profit,
+        "soil_health_rating": "Optimal (Legume-Cereal Synergistic Cycle)",
+        "cycles": cycles,
+    }
